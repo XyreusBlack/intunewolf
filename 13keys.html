@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The 13 Keys — Intune</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b0d; --surf:#131418; --surf-h:#181b21; --surf-a:#1d2230;
+  --bd:rgba(255,255,255,0.07); --bd-m:rgba(255,255,255,0.13);
+  --t1:#F2F2F3; --t2:rgba(242,242,243,.50); --t3:rgba(242,242,243,.28);
+  --r:10px; --rlg:14px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+body{
+  font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:var(--bg);color:var(--t1);
+  font-size:17px;line-height:1.6;
+  min-height:100vh;overflow-x:hidden;
+}
+
+/* Glow — behind everything */
+body::after{
+  content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(ellipse 90% 50% at 50% 0%,rgba(150,0,150,.11) 0%,transparent 65%);
+  animation:gp 10s ease-in-out infinite;
+}
+@keyframes gp{0%,100%{opacity:.55}50%{opacity:1}}
+
+/* Header */
+header{
+  height:56px;border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 max(20px,env(safe-area-inset-left)) 0 max(20px,env(safe-area-inset-right));
+  position:sticky;top:0;z-index:10;
+  background:rgba(10,11,13,.95);
+  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+}
+.hl{font-size:15px;font-weight:500;display:flex;align-items:center;gap:9px;overflow:hidden;}
+.hdot{width:6px;height:6px;border-radius:50%;background:#C700C7;flex-shrink:0;transition:background 1s;}
+.hn{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hr{display:flex;align-items:center;gap:14px;flex-shrink:0;margin-left:12px;}
+.hct{font-size:13px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;}
+.ha{font-size:15px;color:var(--t2);text-decoration:none;padding:8px 0;display:flex;align-items:center;}
+.ha:hover{color:var(--t1);}
+@media(max-width:400px){.hct{display:none;}}
+
+/* Hero */
+.hero{padding:44px 20px 36px;border-bottom:1px solid var(--bd);max-width:1100px;margin:0 auto;}
+@media(min-width:700px){.hero{padding:52px 32px 44px;}}
+.ey{font-size:13px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);
+    display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.ey::before{content:'';width:16px;height:1px;background:var(--t3);}
+.hero h1{font-size:clamp(28px,7vw,48px);font-weight:300;line-height:1.1;margin-bottom:10px;}
+.hero p{font-size:17px;color:var(--t2);line-height:1.75;max-width:520px;}
+
+/* Page body */
+.pg{max-width:1100px;margin:0 auto;
+    padding:20px max(20px,env(safe-area-inset-right)) 100px max(20px,env(safe-area-inset-left));}
+@media(min-width:700px){.pg{padding:28px 32px 80px;}}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:1fr;gap:10px;}
+@media(min-width:700px){.grid{grid-template-columns:1fr 1fr;}}
+
+/* ─── KEY CARD using <details>/<summary> ───
+   This is native HTML — works on every iPhone
+   with zero JavaScript. No tap issues possible. */
+.key-card{
+  background:var(--surf);
+  border:1px solid var(--bd);
+  border-left:3px solid var(--kc,#888);
+  border-radius:var(--r);
+  transition:background .15s;
+}
+.key-card:hover{background:var(--surf-h);}
+
+/* The always-visible face section */
+.kface{padding:18px 18px 16px;}
+@media(min-width:700px){.kface{padding:20px 22px 18px;}}
+
+.krow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;}
+.ktitle{font-size:17px;font-weight:600;line-height:1.3;color:var(--t1);}
+.knote{font-size:22px;font-weight:700;line-height:1;color:var(--kc,#888);flex-shrink:0;padding-top:2px;}
+
+.kmeta{font-size:13px;color:var(--t3);display:flex;align-items:center;gap:6px;margin-bottom:10px;}
+.ksep{width:3px;height:3px;border-radius:50%;background:var(--t3);flex-shrink:0;}
+
+.kdesc{font-size:15px;color:var(--t2);line-height:1.7;margin-bottom:10px;}
+
+.kpills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;}
+.pill{font-size:13px;padding:4px 10px;border-radius:4px;
+      background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+      color:var(--t3);white-space:nowrap;}
+.pill.hi{color:var(--t2);border-color:rgba(255,255,255,.12);}
+
+.ksw{display:flex;gap:6px;align-items:center;}
+.swb{width:18px;height:6px;border-radius:3px;flex-shrink:0;}
+.swl{font-size:12px;color:var(--t3);}
+
+/* ─── <details> native expand ─── */
+details{border-top:1px solid var(--bd);}
+
+/* Remove default marker on all browsers */
+details summary{list-style:none;}
+details summary::-webkit-details-marker{display:none;}
+
+summary{
+  /* Native tappable element — browser handles all touch events */
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 18px;
+  font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:15px;font-weight:500;
+  color:var(--t3);
+  cursor:pointer;
+  user-select:none;
+  -webkit-user-select:none;
+  transition:background .15s,color .15s;
+  /* minimum 44px touch target per iOS HIG */
+  min-height:44px;
+}
+@media(min-width:700px){summary{padding:14px 22px;font-size:13px;}}
+summary:hover{background:rgba(255,255,255,.03);color:var(--t2);}
+details[open] summary{color:var(--t2);background:rgba(255,255,255,.02);}
+
+/* Chevron — CSS animated, no JS */
+.chev{
+  font-size:14px;
+  color:var(--kc,#888);
+  flex-shrink:0;
+  margin-left:8px;
+  transition:transform .28s ease;
+  display:inline-block;
+}
+details[open] .chev{transform:rotate(180deg);}
+
+/* Depth content inside <details> */
+.depth{
+  padding:20px 18px 24px;
+  border-top:1px solid var(--bd);
+  display:flex;flex-direction:column;gap:20px;
+}
+@media(min-width:700px){.depth{padding:20px 22px 24px;}}
+
+.dsec{}
+.dlbl{
+  font-size:12px;font-weight:600;letter-spacing:.10em;text-transform:uppercase;
+  color:var(--kc,#888);margin-bottom:7px;
+  display:flex;align-items:center;gap:7px;
+}
+.dlbl::before{content:'';width:10px;height:1px;background:var(--kc,#888);opacity:.7;flex-shrink:0;}
+.dtxt{font-size:15px;color:var(--t2);line-height:1.75;}
+
+/* ─── Unity ─── */
+.uwrap{margin-top:10px;}
+.ucard{
+  background:var(--surf);border:1px solid var(--bd);
+  border-radius:var(--rlg);padding:24px 20px 22px;
+  position:relative;overflow:hidden;
+}
+@media(min-width:700px){.ucard{padding:32px;}}
+.ucard::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#C700C7 0%,#7700CC 9%,#0000CC 18%,#0066CC 27%,
+    #00CCCC 36%,#44BB00 45%,#99BB00 54%,#CCBB00 63%,
+    #FF8800 72%,#CC0000 81%,#BB0000 90%,#880022 100%);
+}
+.ulbl{font-size:13px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);margin-bottom:8px;}
+.utitle{
+  font-size:clamp(28px,7vw,36px);font-weight:300;line-height:1.1;margin-bottom:14px;
+  display:inline-block;
+  background:linear-gradient(270deg,#C700C7,#7700CC,#0000CC,#0066CC,#00CCCC,
+    #44BB00,#99BB00,#CCBB00,#FF8800,#CC0000,#BB0000,#880022,#C700C7);
+  background-size:400% 100%;
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  animation:us 12s linear infinite;
+}
+@keyframes us{0%{background-position:0% 50%}100%{background-position:400% 50%}}
+.ubody{font-size:17px;color:var(--t2);line-height:1.75;margin-bottom:16px;}
+.uquote{font-size:15px;color:var(--t2);line-height:1.75;font-style:italic;
+        border-left:2px solid rgba(255,255,255,.1);padding-left:16px;}
+
+/* Footer */
+footer{
+  border-top:1px solid var(--bd);
+  padding:20px max(20px,env(safe-area-inset-right)) calc(20px + env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));
+  max-width:1100px;margin:0 auto;
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;
+}
+@media(min-width:700px){footer{padding:20px 32px;}}
+footer p{font-size:13px;color:var(--t3);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hl">
+    <div class="hdot" id="hdot"></div>
+    <span class="hn">Intune <span style="color:var(--t3);font-weight:300">— The 13 Keys</span></span>
+  </div>
+  <div class="hr">
+    <span class="hct">12 Keys + Unity</span>
+    <a class="ha" href="https://weareintune.io" target="_blank" rel="noopener">weareintune.io →</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="ey">The Human Instrument</div>
+  <h1>The 13 Keys</h1>
+  <p>Each Key maps a body location to a musical frequency, a color, and a set of concepts — forming a complete map from ground to crown.</p>
+</div>
+
+<div class="pg">
+<div class="grid">
+
+<!-- 01 -->
+<div class="key-card" style="--kc:#C700C7">
+  <div class="kface">
+    <div class="krow"><span class="ktitle">Mental Clarity</span><span class="knote">F</span></div>
+    <div class="kmeta"><span>Top of Head</span><div class="ksep"></div><span>B#</span></div>
+    <p class="kdesc">Mental clarity opens when the mind stops fighting itself. This center governs unified awareness — the quiet intelligence that exists beyond thought.</p>
+    <div class="kpills"><span class="pill hi">Consciousness</span><span class="pill hi">Awareness</span><span class="pill">Non-Duality</span><span class="pill">Enlightenment</span><span class="pill">Self-Realization</span><span class="pill">Oneness</span><span class="pill">Wisdom</span></div>
+    <div class="ksw"><div class="swb" style="background:#C700C7"></div><div class="swb" style="background:#AAFF00"></div><span class="swl">Violet / Magenta · Lime Green</span></div>
+  </div>
+  <details>
+    <summary>Explore this Key <span class="chev">↓</span></summary>
+    <div class="depth">
+      <div class="dsec"><div class="dlbl">Why this Key matters</div><p class="dtxt">The crown is not above the body — it is the body becoming aware of itself. When this center is clear, perception stops being filtered through anxiety and starts registering what is actually present.</p></div>
+      <div class="dsec"><div class="dlbl">The Science</div><p class="dtxt">Meditation at the crown correlates with gamma wave activity — the fastest brainwave frequency, linked to insight and unified perception. F and B# form intervals associated with open, receptive states.</p></div>
+      <div class="dsec"><div class="dlbl">The Spirit</div><p class="dtxt">Wolfee, the calmest wolf, embodies this Key: he does not arrive at peace through effort. He simply is it. Consciousness not as an achievement, but as the ground state when everything unnecessary has been released.</p></div>
+      <div class="dsec"><div class="dlbl">The Senses — a practice</div><p class="dtxt">Sit still for longer than is comfortable. Notice what remains when the urge to move passes. Chant softly "Ng" or "Om" — feel the vibration at the very top of the skull.</p></div>
+    </div>
+  </details>
+</div>
+
+<!-- 02 -->
+<div class="key-card" style="--kc:#7700CC">
+  <div class="kface">
+    <div class="krow"><span class="ktitle">Trust & Intuition</span><span class="knote">E</span></div>
+    <div class="kmeta"><span>Forehead</span><div class="ksep"></div><span>B</span></div>
+    <p class="kdesc">Intuition is pattern recognition that moves faster than language. This center develops foresight and inner vision — the confidence to act on what you sense before you can prove it.</p>
+    <div class="kpills"><span class="pill hi">Intuition</span><span class="pill hi">Intelligence</span><span class="pill">Foresight</span><span class="pill">Psychic Vision</span><span class="pill">Mysticism</span><span class="pill">Clairvoyance</span><span class="pill">Imagination</span></div>
+    <div class="ksw"><div class="swb" style="background:#7700CC"></div><div class="swb" style="background:#AAFF00"></div><span class="swl">Purple · Lime Green</span></div>
+  </div>
+  <details>
+    <summary>Explore this Key <span class="chev">↓</span></summary>
+    <div class="depth">
+      <div class="dsec"><div class="dlbl">Why this Key matters</div><p class="dtxt">The third eye is the seat of pattern recognition — the sense that something is true before you have evidence for it. This is not mystical; it is a form of intelligence most people are trained to ignore.</p></div>
+      <div class="dsec"><div class="dlbl">The Science</div><p class="dtxt">EEG studies show theta and gamma states enhance creative and intuitive processing. E and B create intervals linked to inward-focused attention — the same state that produces moments of sudden knowing.</p></div>
+      <div class="dsec"><div class="dlbl">The Spirit</div><p class="dtxt">Charlee leads without performance. She does not announce her decisions — she makes them quietly, from inner certainty that others feel before they understand. Self-discovery is recognizing what was always already there.</p></div>
+      <div class="dsec"><div class="dlbl">The Senses — a practice</div><p class="dtxt">Breathe in for 4 counts, out for 4. Ask a question you do not have an answer to. Wait without trying to think. Notice what arrives instead. Chant "Om," focusing between the eyebrows.</p></div>
+    </div>
+  </details>
+</div>
+
+<!-- 03 -->
+<div class="key-card" style="--kc:#0000CC">
+  <div class="kface">
+    <div class="krow"><span class="ktitle">Sharpened Perception</span><span class="knote">Eb</span></div>
+    <div class="kmeta"><span>Eyes, Ears & Nose</span><div class="ksep"></div><span>A#</span></div>
+    <p class="kdesc">The senses are your primary intelligence system. This center turns attention into discernment — seeing possibilities others miss, reading environments with precision.</p>
+    <div class="kpills"><span class="pill hi">Discernment</span><span class="pill hi">Observation</span><span class="pill">Possibilities</span><span class="pill">Sensors to Perceive Ourselves & the World</span></div>
+    <div class="ksw"><div class="swb" style="background:#0000CC"></div><div class="swb" style="background:#FFFF00"></div><span class="swl">Deep Blue · Yellow</span></div>
+  </div>
+  <details>
+    <summary>Explore this Key <span class="chev">↓</span></summary>
+    <div class="depth">
+      <div class="dsec"><div class="dlbl">Why this Key matters</div><p class="dtxt">Perception is not passive. What we notice shapes what we understand, decide, and who we become. This Key is the discipline of noticing more — and trusting what you notice.</p></div>
+      <div class="dsec"><div class="dlbl">The Science</div><p class="dtxt">Eb works with the sensory organs. Blue (calm, clarity) balanced by yellow (awareness) supports mindful observation over reactive scanning — the difference between threat detection and genuine attention.</p></div>
+      <div class="dsec"><div class="dlbl">The Spirit</div><p class="dtxt">Kenai was quiet, watchful, perpetually absorbing. What looked like shyness was preparation. His rise to Alpha was the accumulated weight of ten thousand observations finally moving.</p></div>
+      <div class="dsec"><div class="dlbl">The Senses — a practice</div><p class="dtxt">Spend two minutes looking at something you pass every day. Find three things you have never noticed before. Hum softly, feeling vibrations around your eyes, ears, and nose.</p></div>
+    </div>
+  </details>
+</div>
+
+<!-- 04 -->
+<div class="key-card" style="--kc:#0066CC">
+  <div class="kface">
+    <div class="krow"><span class="ktitle">Clear Communication</span><span class="knote">D</span></div>
+    <div class="kmeta"><span>Throat</span><div class="ksep"></div><span>A</span></div>
+    <p class="kdesc">Clear communication starts with honesty, not technique. This center governs the alignment between inner truth and outward expression — speech, self-expression, and intuitive reading of others.</p>
+    <div class="kpills"><span class="pill hi">Speech</span><span class="pill hi">Truth</span><span class="pill">Clarity</span><span class="pill">Self-Expression</span><span class="pill">Intuitive About Others</span></div>
+    <div class="ksw"><div class="swb" style="background:#0066CC"></div><div class="swb" style="background:#FF8800"></div><span class="swl">Sky Blue · Orange</span></div>
+  </div>
+  <details>
+    <summary>Explore this Key <span class="chev">↓</span></summary>
+    <div class="depth">
+      <div class="dsec"><div class="dlbl">Why this Key matters</div><p class="dtxt">The throat is the passage between inner experience and the world. What goes unexpressed does not disappear — it accumulates. Clarity here is about the match between what you mean and what you say.</p></div>
+      <div class="dsec"><div class="dlbl">The Science</div><p class="dtxt">Speech patterns modulate alpha and beta rhythms, influencing both clarity of thought and receptivity in others. D and A form a stable harmonic interval supporting open, adaptive communication.</p></div>
+      <div class="dsec"><div class="dlbl">The Spirit</div><p class="dtxt">Ayasha is the wolf who never holds back — and she is small. Her power is not in size but in completeness. She does not edit herself for safety, and the pack trusts her for it.</p></div>
+      <div class="dsec"><div class="dlbl">The Senses — a practice</div><p class="dtxt">Say one thing today you have been waiting for the right moment to say. Notice what the right moment was waiting for. Chant "Ham," feeling resonance in the throat.</p></div>
+    </div>
+  </details>
+</div>
+
+<!-- 05 -->
+<div class="key-card" style="--kc:#00BBBB">
+  <div class="kface">
+    <div class="krow"><span class="ktitle">Breath Control</span><span class="knote">C#</span></div>
+    <div class="kmeta"><span>Lungs</span><div class="ksep"></div><span>G#</span></div>
+    <p class="kdesc">Breath is the bridge between inner and outer worlds. This center connects physical vitality with conscious presence — where controlling the breath means controlling the quality of experience.</p>
+    <div class="kpills"><span class="pill hi">Experience</span><span class="pill hi">Exert Pressure</span><span class="pill">Connecting Inner & Outer World Through Breath</span></div>
+    <div class="ksw"><div class="swb" style="background:#00BBBB"></div><div class="swb" style="background:#FF3300"></div><span class="swl">Cyan · Red-Orange</span></div>
+  </div>
+  <details>
+    <summary>Explore this Key <span class="chev">↓</span></summary>
+    <div class="depth">
+      <div class="dsec"><div class="dlbl">Why this Key matters</div><p class="dtxt">The lungs bridge voluntary and involuntary. Breath is the one physiological function you can consciously direct — that makes it the practice ground for everything else you want to direct consciously.</p></div>
+      <div class="dsec"><div class="dlbl">The Science</div><p class="dtxt">Slow, controlled breathing reduces cortisol and increases heart rate variability. C# and G# form intervals linked to stabilized emotional states — the nervous system settling into sustainable engagement.</p></div>
+      <div class="dsec"><div class="dlbl">The Spirit</div><p class="dtxt">Mia howls with severed vocal cords. Her biology says it is impossible. Her commitment says otherwise. Breath is where the decision to act fully lives — before the capacity to act at all.</p></div>
+      <div class="dsec"><div class="dlbl">The Senses — a practice</div><p class="dtxt">5 seconds in, 5 seconds out. Continue for 3 minutes. Notice the moment you stop thinking about anything other than the breath. A soft "Ha" on the exhale, feeling chest expansion.</p></div>
+    </div>
+  </details>
+</div>
+
+<!-- 06 -->
+<div class="key-card" style="--kc:#44BB00">
+  <div class="kface">
+    <div class="krow"><span class="ktitle">Emotional Balance</span><span class="knote">C</span></div>
+    <div class="kmeta"><span>Heart</span><div class="ksep"></div><span>G</span></div>
+    <p class="kdesc">Emotional balance and clarity come from within. This center governs love, compassion, and transformation — the capacity to feel fully without being destabilized.</p>
+    <div class="kpills"><span class="pill hi">Love</span><span class="pill hi">Compassion</span><span class="pill">Joy</span><span class="pill">Bliss</span><span class="pill">Connection</span><span class="pill">Beauty</span><span class="pill">Transformation</span></div>
+    <div class="ksw"><div class="swb" style="background:#44BB00"></div><div class="swb" style="background:#8800CC"></div><span class="swl">Lime Green · Purple</span></div>
+  </div>
+  <details>
+    <summary>Explore this Key <span class="chev">↓</span></summary>
+    <div class="depth">
+      <div class="dsec"><div class="dlbl">Why this Key matters</div><p class="dtxt">The heart is the center of emotional intelligence. When clear, empathy becomes sustainable rather than draining. Joy becomes a baseline rather than a relief. This Key is integration — evidence that something difficult has been metabolized.</p></div>
+      <div class="dsec"><div class="dlbl">The Science</div><p class="dtxt">Heart-focused breathing (inhale 4s, exhale 6s) promotes alpha rhythms and cardiac coherence — states linked to increased empathy and improved decision-making. C and G create one of the most stable harmonic intervals.</p></div>
+      <div class="dsec"><div class="dlbl">The Spirit</div><p class="dtxt">Koda is joyful. He is also a survivor. His joy is the evidence of survival metabolized — the body's signal that something difficult has been moved through, not around.</p></div>
+      <div class="dsec"><div class="dlbl">The Senses — a practice</div><p class="dtxt">Breathe into your chest specifically — feel it expand in all directions. Chant "Yam," letting the sound resonate in the chest, not the throat. Plan one act of kindness today.</p></div>
+    </div>
+  </details>
+</div>
+
+<!-- 07 -->
+<div class="key-card" style="--kc:#99BB00">
+  <div class="kface">
+    <div class="krow"><span class="ktitle">Confidence & Power</span><span class="knote">B</span></div>
+    <div class="kmeta"><span>Solar Plexus</span><div class="ksep"></div><span>F</span></div>
+    <p class="kdesc">Confidence is built through alignment, not performance. This center connects personal power with community — the inner light that radiates outward when self-trust meets collective purpose.</p>
+    <div class="kpills"><span class="pill hi">Inner Light</span><span class="pill hi">Community</span><span class="pill">Connection of Above & Below</span></div>
+    <div class="ksw"><div class="swb" style="background:#99BB00"></div><div class="swb" style="background:#8800CC"></div><span class="swl">Yellow-Green · Purple</span></div>
+  </div>
+  <details>
+    <summary>Explore this Key <span class="chev">↓</span></summary>
+    <div class="depth">
+      <div class="dsec"><div class="dlbl">Why this Key matters</div><p class="dtxt">The solar plexus integrates above and below — personal will grounded in the body, directed toward the world. Confidence here is the stable sense that what you have to offer is genuinely worth offering.</p></div>
+      <div class="dsec"><div class="dlbl">The Science</div><p class="dtxt">B and F form a balanced tension that resolves into confidence and social integration. Yellow-green (personal power) complemented by purple supports prosocial leadership — the kind that increases group capacity.</p></div>
+      <div class="dsec"><div class="dlbl">The Spirit</div><p class="dtxt">Luna gives without disappearing. She is present for every pack member and equally present to herself. This is the hardest version of generosity — the kind that does not require you to become less to offer more.</p></div>
+      <div class="dsec"><div class="dlbl">The Senses — a practice</div><p class="dtxt">Inhale into your belly specifically. Chant "Ram," feeling warmth in the solar plexus. Reflect: how do you connect your personal power with the wellbeing of those around you?</p></div>
+    </div>
+  </details>
+</div>
+
+<!-- 08 -->
+<div class="key-card" style="--kc:#CCBB00">
+  <div class="kface">
+    <div class="krow"><span class="ktitle">Gut-Brain Connection</span><span class="knote">A#</span></div>
+    <div class="kmeta"><span>Stomach</span><div class="ksep"></div><span>Eb</span></div>
+    <p class="kdesc">The gut processes more than food — it processes decisions and influence. This center governs self-esteem, discipline, and the reliable capacity to act with clarity under pressure.</p>
+    <div class="kpills"><span class="pill hi">Power</span><span class="pill hi">Confidence</span><span class="pill">Self-Esteem</span><span class="pill">Control</span><span class="pill">Decisions</span><span class="pill">Discipline</span><span class="pill">Reliable</span></div>
+    <div class="ksw"><div class="swb" style="background:#CCBB00"></div><div class="swb" style="background:#0000CC"></div><span class="swl">Yellow · Deep Blue</span></div>
+  </div>
+  <details>
+    <summary>Explore this Key <span class="chev">↓</span></summary>
+    <div class="depth">
+      <div class="dsec"><div class="dlbl">Why this Key matters</div><p class="dtxt">The enteric nervous system processes emotional data and drives intuitive decisions independently of the head. Gut-brain coherence means these two intelligences are in dialogue rather than opposition.</p></div>
+      <div class="dsec"><div class="dlbl">The Science</div><p class="dtxt">A# and Eb create a balanced tension and release. Blue (calm authority) complemented by yellow (clarity) supports disciplined, reliable energy — the kind that can be sustained across time, not just in moments.</p></div>
+      <div class="dsec"><div class="dlbl">The Spirit</div><p class="dtxt">Max does not rush. He holds his ground with consistency, and the pack turns to him — not because he is the loudest, but because he was there yesterday and will be there tomorrow. Reliability is its own kind of love.</p></div>
+      <div class="dsec"><div class="dlbl">The Senses — a practice</div><p class="dtxt">Inhale strength into your stomach area. Exhale doubt completely. 5 cycles. Chant a short "Ha," affirming inner strength. Commit to one disciplined action today.</p></div>
+    </div>
+  </details>
+</div>
+
+<!-- 09 -->
+<div class="key-card" style="--kc:#FF8800">
+  <div class="kface">
+    <div class="krow"><span class="ktitle">Creative Expression</span><span class="knote">A</span></div>
+    <div class="kmeta"><span>Sacrum</span><div class="ksep"></div><span>D</span></div>
+    <p class="kdesc">Healthy expression matters. This center governs creativity, social connection, and the full range of emotional life — the vitality that emerges when belonging feels safe enough to generate.</p>
+    <div class="kpills"><span class="pill hi">Creative</span><span class="pill hi">Social</span><span class="pill">Emotions & Feelings</span><span class="pill">Intimacy</span><span class="pill">Pleasure</span></div>
+    <div class="ksw"><div class="swb" style="background:#FF8800"></div><div class="swb" style="background:#0066CC"></div><span class="swl">Orange · Sky Blue</span></div>
+  </div>
+  <details>
+    <summary>Explore this Key <span class="chev">↓</span></summary>
+    <div class="depth">
+      <div class="dsec"><div class="dlbl">Why this Key matters</div><p class="dtxt">The sacrum governs fundamental creativity and emotional expression — not art specifically, but the generative capacity that emerges when people feel safe enough to contribute authentically. Belonging is the prerequisite.</p></div>
+      <div class="dsec"><div class="dlbl">The Science</div><p class="dtxt">A and D form a stable interval. Orange (passion, vitality) balanced by blue (calm truth) ensures emotional creativity remains both genuine and grounded. Psychological safety is the primary predictor of group creative output.</p></div>
+      <div class="dsec"><div class="dlbl">The Spirit</div><p class="dtxt">Daisy knows where she belongs. She is not performing teamwork — she is expressing it. Her contribution is spontaneous because it costs her nothing to be herself in this pack. The most creative thing she does is belong.</p></div>
+      <div class="dsec"><div class="dlbl">The Senses — a practice</div><p class="dtxt">Alternate nostril breathing for 3 minutes. Chant "Vam," feeling the sound in the lower abdomen. Notice one way to nurture your emotional or creative life this week.</p></div>
+    </div>
+  </details>
+</div>
+
+<!-- 10 -->
+<div class="key-card" style="--kc:#CC0000">
+  <div class="kface">
+    <div class="krow"><span class="ktitle">Strength & Safety</span><span class="knote">G#</span></div>
+    <div class="kmeta"><span>Base of Spine</span><div class="ksep"></div><span>C#</span></div>
+    <p class="kdesc">A strong foundation provides security. This center is the seat of core identity — confidence, self-esteem, and the steady sense of self that makes everything above it possible.</p>
+    <div class="kpills"><span class="pill hi">Confidence</span><span class="pill hi">Self-Esteem</span><span class="pill">Core Identity</span></div>
+    <div class="ksw"><div class="swb" style="background:#CC0000"></div><div class="swb" style="background:#00BBBB"></div><span class="swl">Red · Cyan</span></div>
+  </div>
+  <details>
+    <summary>Explore this Key <span class="chev">↓</span></summary>
+    <div class="depth">
+      <div class="dsec"><div class="dlbl">Why this Key matters</div><p class="dtxt">The base of the spine supports everything above it. When this center is clear, decisions come from security rather than fear. Identity stops being a question and starts being a foundation.</p></div>
+      <div class="dsec"><div class="dlbl">The Science</div><p class="dtxt">G# and C# form stable intervals linked to physiological grounding responses. Box breathing coordinated with this frequency reduces cortisol markers and stabilizes HRV — the nervous system's own measure of resilience.</p></div>
+      <div class="dsec"><div class="dlbl">The Spirit</div><p class="dtxt">Annie lost a limb and runs as though she has never been more complete. She did not wait to be whole before beginning to live fully. Self-acceptance is a decision made before the process is finished.</p></div>
+      <div class="dsec"><div class="dlbl">The Senses — a practice</div><p class="dtxt">Stand barefoot. Inhale 4, hold 4, exhale 4, hold 4. Feel the floor. Notice what does not move beneath you. Hum low — let the sound settle into your lower back.</p></div>
+    </div>
+  </details>
+</div>
+
+<!-- 11 -->
+<div class="key-card" style="--kc:#BB0000">
+  <div class="kface">
+    <div class="krow"><span class="ktitle">Flexibility</span><span class="knote">G</span></div>
+    <div class="kmeta"><span>Knees</span><div class="ksep"></div><span>C</span></div>
+    <p class="kdesc">Strength comes from flexibility. This center governs the capacity to adapt without losing ground — the physical and psychological alignment that allows change to become movement.</p>
+    <div class="kpills"><span class="pill hi">Flexibility</span><span class="pill hi">Mind & Body Alignment</span></div>
+    <div class="ksw"><div class="swb" style="background:#BB0000"></div><div class="swb" style="background:#AAFF00"></div><span class="swl">Red · Lime Green</span></div>
+  </div>
+  <details>
+    <summary>Explore this Key <span class="chev">↓</span></summary>
+    <div class="depth">
+      <div class="dsec"><div class="dlbl">Why this Key matters</div><p class="dtxt">Knees are the body's primary joints of adaptation — they absorb force, change direction, and hold the entire structure upright through constant micro-adjustment. Flexibility is not weakness; it is what allows you to remain standing.</p></div>
+      <div class="dsec"><div class="dlbl">The Science</div><p class="dtxt">G and C form a perfect fourth — one of the most stable harmonic intervals. Red (strength) balanced by lime green (adaptability) reflects the biological paradox of flexible strength: the most responsive organisms survive.</p></div>
+      <div class="dsec"><div class="dlbl">The Spirit</div><p class="dtxt">Gemma found herself not in isolation but in relationship — in the encounter with others like her. She embodies the leadership paradox: you cannot truly lead until you have been genuinely led.</p></div>
+      <div class="dsec"><div class="dlbl">The Senses — a practice</div><p class="dtxt">Gently bend your knees slightly more than your natural standing position. Notice what is required to stay upright. That sustained, subtle effort is the practice. Hum, feeling vibration in the knees and legs.</p></div>
+    </div>
+  </details>
+</div>
+
+<!-- 12 -->
+<div class="key-card" style="--kc:#880022">
+  <div class="kface">
+    <div class="krow"><span class="ktitle">Grounding</span><span class="knote">F#</span></div>
+    <div class="kmeta"><span>Bottom of Feet</span><div class="ksep"></div><span>B#</span></div>
+    <p class="kdesc">Stability starts from the ground up. This center governs survival, nature connection, and the rootedness that makes all other development possible — the earth beneath everything else.</p>
+    <div class="kpills"><span class="pill hi">Grounding</span><span class="pill hi">Stability</span><span class="pill">Survival</span><span class="pill">Connection to Nature</span></div>
+    <div class="ksw"><div class="swb" style="background:#880022"></div><div class="swb" style="background:#BBFF44"></div><span class="swl">Deep Red · Yellow-Green</span></div>
+  </div>
+  <details>
+    <summary>Explore this Key <span class="chev">↓</span></summary>
+    <div class="depth">
+      <div class="dsec"><div class="dlbl">Why this Key matters</div><p class="dtxt">The feet are the body's literal contact point with the earth. Willow's tracking intelligence is grounded intelligence — her perceptual range is made possible by her rootedness. When you cannot think clearly, stand on something real.</p></div>
+      <div class="dsec"><div class="dlbl">The Science</div><p class="dtxt">F# and B# align with stable, uplifting intervals. Research on nature exposure consistently shows measurable reductions in cortisol, improved mood, and enhanced attention within 20 minutes of contact with the natural world.</p></div>
+      <div class="dsec"><div class="dlbl">The Spirit</div><p class="dtxt">Willow reads the land. Her intelligence is not abstract — it is relational to the earth itself. She knows where she is because she knows what she is standing on. This is the most practical intelligence in the pack.</p></div>
+      <div class="dsec"><div class="dlbl">The Senses — a practice</div><p class="dtxt">Go outside. Stand barefoot on grass, soil, or stone. Inhale, exhale imagining roots extending into the earth. 3 minutes. Notice what the earth asks nothing of you in return.</p></div>
+    </div>
+  </details>
+</div>
+
+</div><!-- end .grid -->
+
+<div class="uwrap">
+  <div class="ucard">
+    <div class="ulbl">The 13th Key</div>
+    <div class="utitle">Unity</div>
+    <p class="ubody">Unity is not the 13th stop on a list — it is the recognition that all 12 Keys exist within a single instrument. The body, fully tuned. The pack, in frequency.</p>
+    <p class="uquote">"The wolf pack does not function because every wolf is identical. It functions because each wolf knows their frequency — and holds it steadily enough that the pack can hear itself think."</p>
+  </div>
+</div>
+
+</div><!-- end .pg -->
+
+<footer>
+  <p>Wolf Connection × Intune × Reality Center</p>
+  <p>weareintune.io</p>
+</footer>
+
+<script>
+/* Glow shifts as you scroll — purely cosmetic, no tap interaction */
+var COLS=['#C700C7','#7700CC','#0000CC','#0066CC','#00BBBB',
+          '#44BB00','#99BB00','#CCBB00','#FF8800','#CC0000','#BB0000','#880022'];
+var style=document.createElement('style');
+document.head.appendChild(style);
+function setGlow(hex){
+  var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  style.textContent='body::after{background:radial-gradient(ellipse 90% 50% at 50% 0%,rgba('+r+','+g+','+b+',.11) 0%,transparent 65%) !important;}';
+  document.getElementById('hdot').style.background=hex;
+}
+var cards=document.querySelectorAll('.key-card');
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){
+    if(e.isIntersecting){
+      var i=Array.from(cards).indexOf(e.target);
+      if(i>=0)setGlow(COLS[i]);
+    }
+  });
+},{threshold:0.3,rootMargin:'-56px 0px 0px 0px'});
+cards.forEach(function(c){obs.observe(c);});
+</script>
+</body>
+</html>
