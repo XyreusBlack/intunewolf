@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Two-Day Immersive Wellness Experience — Reality Center</title>
+<style>
+:root {
+  --bg: #060809;
+  --surface: rgba(255,255,255,0.028);
+  --surface-hover: rgba(255,255,255,0.048);
+  --border: rgba(255,255,255,0.07);
+  --border-soft: rgba(255,255,255,0.04);
+  --text: #EDF0EC;
+  --muted: #8A9690;
+  --soft: #C8D8D0;
+  --teal: #7EEDC4;
+  --teal-dim: rgba(126,237,196,0.12);
+  --teal-glow: rgba(126,237,196,0.22);
+  --cyan: #6DD5FF;
+  --cyan-dim: rgba(109,213,255,0.10);
+  --amber: #F0C060;
+  --amber-dim: rgba(240,192,96,0.10);
+  --amber-glow: rgba(240,192,96,0.20);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ── AMBIENT LAYER ── */
+.ambient-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.35;
+  animation: driftOrb 20s ease-in-out infinite alternate;
+}
+.ambient-orb:nth-child(1) {
+  width: 60vw; height: 60vw;
+  top: -20%; left: -10%;
+  background: radial-gradient(circle, rgba(126,237,196,0.25), transparent 70%);
+  animation-duration: 22s;
+}
+.ambient-orb:nth-child(2) {
+  width: 50vw; height: 50vw;
+  top: 10%; right: -10%;
+  background: radial-gradient(circle, rgba(109,213,255,0.2), transparent 70%);
+  animation-duration: 18s;
+  animation-delay: -8s;
+}
+.ambient-orb:nth-child(3) {
+  width: 45vw; height: 45vw;
+  bottom: -15%; left: 30%;
+  background: radial-gradient(circle, rgba(126,237,196,0.15), transparent 70%);
+  animation-duration: 25s;
+  animation-delay: -12s;
+}
+@keyframes driftOrb {
+  0%   { transform: translate(0,0) scale(1); }
+  100% { transform: translate(30px, -20px) scale(1.08); }
+}
+
+/* GRID OVERLAY */
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.014) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.014) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+}
+
+/* ── LAYOUT ── */
+.wrap {
+  position: relative; z-index: 1;
+  width: min(100% - 40px, 1160px);
+  margin: 0 auto;
+}
+
+section { padding: 120px 0; }
+section:first-child { padding-top: 0; }
+
+/* ── TYPOGRAPHY ── */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.eyebrow::before {
+  content: "";
+  display: block;
+  width: 24px; height: 1px;
+  background: linear-gradient(90deg, var(--teal), transparent);
+}
+
+h1 {
+  font-size: clamp(44px, 7.5vw, 110px);
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  font-weight: 300;
+  color: var(--text);
+}
+h1 em { font-style: normal; color: var(--teal); }
+h2 {
+  font-size: clamp(32px, 4.5vw, 64px);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  font-weight: 300;
+}
+h3 {
+  font-size: clamp(20px, 2.5vw, 28px);
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+  font-weight: 400;
+}
+h4 {
+  font-size: 18px;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  font-weight: 500;
+}
+p.body-lg {
+  font-size: clamp(17px, 1.6vw, 20px);
+  line-height: 1.75;
+  color: var(--soft);
+}
+p.body-sm {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+/* ── GLASS ── */
+.glass {
+  background: linear-gradient(160deg, rgba(20,32,28,0.7), rgba(10,16,14,0.55));
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.glass-sm {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 18px;
+}
+
+/* ── REVEAL ANIMATION ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.9s cubic-bezier(0.22,1,0.36,1),
+              transform 0.9s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal.in { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ════════════════════════════════════════════
+   HERO
+════════════════════════════════════════════ */
+.hero {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0;
+  padding-bottom: 80px;
+}
+.hero-inner {
+  position: relative; z-index: 1;
+  width: min(100% - 40px, 1160px);
+  margin: 0 auto;
+}
+.hero-eyebrow { margin-bottom: 40px; }
+.hero-title { margin-bottom: 36px; }
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 40px;
+}
+.hero-tag {
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 8px 16px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+}
+.hero-stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  margin-top: 60px;
+}
+.hero-stat {
+  padding: 28px 32px;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+}
+.hero-stat:first-child { border-radius: 20px 0 0 20px; }
+.hero-stat:last-child  { border-radius: 0 20px 20px 0; }
+.stat-num {
+  font-size: clamp(36px, 4vw, 52px);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.stat-label {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.stat-note { font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+/* ════════════════════════════════════════════
+   JOURNEY — VISUAL FLOW
+════════════════════════════════════════════ */
+.journey-section { background: transparent; }
+.journey-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: end;
+  margin-bottom: 80px;
+}
+.journey-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  position: relative;
+}
+/* connecting line */
+.journey-steps::before {
+  content: "";
+  position: absolute;
+  top: 28px; left: 8%; right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(126,237,196,0.3) 20%,
+    rgba(109,213,255,0.5) 50%,
+    rgba(126,237,196,0.3) 80%,
+    transparent);
+  z-index: 0;
+}
+.journey-step {
+  position: relative; z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0 16px;
+}
+.step-num {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  color: var(--teal);
+  background: linear-gradient(135deg, rgba(126,237,196,0.12), rgba(109,213,255,0.08));
+  border: 1px solid rgba(126,237,196,0.2);
+  margin-bottom: 28px;
+  flex-shrink: 0;
+}
+.step-title {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 14px;
+  color: var(--text);
+}
+.step-desc { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+/* ════════════════════════════════════════════
+   WHY THIS WORKS
+════════════════════════════════════════════ */
+.why-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.why-card {
+  padding: 48px 40px;
+  position: relative;
+  overflow: hidden;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.why-card::before {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.why-card.teal::before {
+  background: radial-gradient(circle at 80% 20%, rgba(126,237,196,0.14), transparent 60%);
+}
+.why-card.amber::before {
+  background: radial-gradient(circle at 80% 20%, rgba(240,192,96,0.14), transparent 60%);
+}
+.why-icon {
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  display: inline-block;
+  width: fit-content;
+}
+.why-card.teal .why-icon { color: var(--teal); border: 1px solid rgba(126,237,196,0.25); background: var(--teal-dim); }
+.why-card.amber .why-icon { color: var(--amber); border: 1px solid rgba(240,192,96,0.25); background: var(--amber-dim); }
+.why-large-num {
+  position: absolute;
+  top: 32px; right: 32px;
+  font-size: 140px;
+  line-height: 1;
+  letter-spacing: -0.08em;
+  font-weight: 700;
+  opacity: 0.05;
+  user-select: none;
+}
+.why-body { position: relative; z-index: 1; }
+.why-body h3 { margin-bottom: 16px; }
+.why-points {
+  list-style: none;
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.why-points li {
+  font-size: 14px;
+  color: var(--muted);
+  padding-left: 18px;
+  position: relative;
+  line-height: 1.6;
+}
+.why-card.teal .why-points li::before {
+  content: "·";
+  position: absolute; left: 0;
+  color: var(--teal);
+  font-size: 18px; line-height: 1.1;
+}
+.why-card.amber .why-points li::before {
+  content: "·";
+  position: absolute; left: 0;
+  color: var(--amber);
+  font-size: 18px; line-height: 1.1;
+}
+
+/* ════════════════════════════════════════════
+   DAYS
+════════════════════════════════════════════ */
+.days-head {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 80px;
+}
+.days-head h2 { margin: 20px 0 24px; }
+.days-stack { display: flex; flex-direction: column; gap: 24px; }
+
+.day-card {
+  padding: 56px 52px;
+  position: relative;
+  overflow: hidden;
+}
+.day-card::after {
+  content: "";
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.day-card.day1::after {
+  background: radial-gradient(circle at 95% 10%, rgba(126,237,196,0.1), transparent 40%);
+}
+.day-card.day2::after {
+  background: radial-gradient(circle at 95% 10%, rgba(240,192,96,0.1), transparent 40%);
+}
+.day-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.day-label-block {}
+.day-label {
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.day-card.day1 .day-label { color: var(--teal); }
+.day-card.day2 .day-label { color: var(--amber); }
+.day-label::before {
+  content: "";
+  width: 6px; height: 6px; border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 12px currentColor;
+}
+.day-price {
+  text-align: right;
+  flex-shrink: 0;
+}
+.day-price-num {
+  font-size: clamp(38px, 4vw, 56px);
+  line-height: 1;
+  letter-spacing: -0.05em;
+  display: block;
+  margin-bottom: 6px;
+}
+.day-card.day1 .day-price-num { color: var(--teal); }
+.day-card.day2 .day-price-num { color: var(--amber); }
+.day-price-label {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.day-body { position: relative; z-index: 1; }
+.day-body > p { margin-bottom: 36px; }
+.phases {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.phase {
+  padding: 20px 18px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.025);
+  border: 1px solid var(--border-soft);
+}
+.phase-time {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.day-card.day1 .phase-time { color: var(--teal); }
+.day-card.day2 .phase-time { color: var(--amber); }
+.phase-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+.takeaways {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 24px;
+}
+.takeaways li {
+  font-size: 14px;
+  color: var(--soft);
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.55;
+}
+.day-card.day1 .takeaways li::before {
+  content: "→";
+  position: absolute; left: 0;
+  color: var(--teal);
+  font-size: 12px;
+}
+.day-card.day2 .takeaways li::before {
+  content: "→";
+  position: absolute; left: 0;
+  color: var(--amber);
+  font-size: 12px;
+}
+
+.day-outcome {
+  margin-top: 32px;
+  padding: 20px 24px;
+  border-radius: 14px;
+  border-left: 3px solid;
+}
+.day-card.day1 .day-outcome { border-color: var(--teal); background: var(--teal-dim); }
+.day-card.day2 .day-outcome { border-color: var(--amber); background: var(--amber-dim); }
+.outcome-label {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.outcome-text { font-size: 15px; color: var(--soft); line-height: 1.6; }
+
+/* ════════════════════════════════════════════
+   IMPACT
+════════════════════════════════════════════ */
+.impact-section { background: transparent; }
+.impact-head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: end;
+  margin-bottom: 64px;
+}
+.impact-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.impact-card {
+  padding: 36px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+.impact-card:hover {
+  background: var(--surface-hover);
+  border-color: rgba(255,255,255,0.1);
+}
+.impact-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: var(--teal-dim);
+  border: 1px solid rgba(126,237,196,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.impact-card h4 { color: var(--text); }
+.impact-card p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+/* ════════════════════════════════════════════
+   SUPPORT LOGISTICS
+════════════════════════════════════════════ */
+.support-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 64px;
+}
+.support-card {
+  padding: 36px 30px;
+}
+.support-num {
+  font-size: 52px;
+  line-height: 1;
+  letter-spacing: -0.06em;
+  color: rgba(126,237,196,0.15);
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+.support-card h4 { margin-bottom: 14px; }
+.support-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.support-list li {
+  font-size: 14px;
+  color: var(--muted);
+  padding-left: 16px;
+  position: relative;
+  line-height: 1.5;
+}
+.support-list li::before {
+  content: "·";
+  position: absolute; left: 0;
+  color: var(--teal);
+  font-size: 20px; line-height: 0.9;
+}
+
+/* ════════════════════════════════════════════
+   STRATEGIC FRAMING
+════════════════════════════════════════════ */
+.framing-card {
+  padding: 72px 64px;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 64px;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+.framing-card::before {
+  content: "";
+  position: absolute;
+  width: 400px; height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(126,237,196,0.06), transparent 70%);
+  right: -80px; top: -80px;
+  pointer-events: none;
+}
+.framing-body h2 { margin: 20px 0 24px; }
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 28px;
+}
+.chip {
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-size: 13px;
+  color: var(--soft);
+}
+.framing-quote {
+  padding: 36px 32px;
+  border-left: 2px solid rgba(126,237,196,0.4);
+  background: rgba(126,237,196,0.04);
+  border-radius: 4px 20px 20px 4px;
+  position: relative; z-index: 1;
+}
+.quote-label {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 16px;
+}
+.framing-quote h3 { font-size: 22px; line-height: 1.3; margin-bottom: 16px; }
+.framing-quote p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+/* ════════════════════════════════════════════
+   BUDGET
+════════════════════════════════════════════ */
+.budget-section { background: transparent; }
+.budget-head {
+  text-align: center;
+  max-width: 560px;
+  margin: 0 auto 80px;
+}
+.budget-head h2 { margin: 20px 0 24px; }
+
+.budget-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 24px;
+  align-items: start;
+}
+.budget-total-card {
+  padding: 52px 44px;
+  text-align: center;
+  position: sticky;
+  top: 40px;
+}
+.budget-ring-wrap {
+  position: relative;
+  width: min(100%, 260px);
+  margin: 0 auto 40px;
+}
+.budget-ring-svg { width: 100%; }
+.budget-total-num {
+  font-size: clamp(48px, 5vw, 72px);
+  line-height: 1;
+  letter-spacing: -0.06em;
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+.budget-total-label {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.budget-per {
+  font-size: 15px;
+  color: var(--soft);
+  margin-bottom: 4px;
+}
+.budget-per span { color: var(--teal); font-weight: 600; }
+
+.budget-lines {
+  padding: 44px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.budget-line {}
+.budget-line-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+.budget-line-name { font-size: 15px; color: var(--text); }
+.budget-line-amt {
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  color: var(--soft);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.budget-track {
+  width: 100%; height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.budget-fill {
+  height: 100%;
+  border-radius: inherit;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.2s cubic-bezier(0.22,1,0.36,1);
+}
+.budget-fill.teal { background: linear-gradient(90deg, var(--teal), var(--cyan)); box-shadow: 0 0 12px var(--teal-glow); }
+.budget-fill.dim  { background: linear-gradient(90deg, rgba(126,237,196,0.5), rgba(109,213,255,0.4)); }
+.budget-fill.muted{ background: rgba(255,255,255,0.15); }
+.budget-fill.animated { transform: scaleX(1); }
+
+/* ════════════════════════════════════════════
+   OUTCOMES
+════════════════════════════════════════════ */
+.outcomes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.outcome-card {
+  padding: 36px 32px;
+}
+.outcome-kicker {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin-bottom: 16px;
+}
+.outcome-card h4 { margin-bottom: 12px; }
+
+/* ════════════════════════════════════════════
+   FOOTER
+════════════════════════════════════════════ */
+footer {
+  padding: 80px 0;
+  text-align: center;
+  border-top: 1px solid var(--border-soft);
+  position: relative; z-index: 1;
+}
+.footer-logo {
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+.footer-note { font-size: 14px; color: rgba(138,150,144,0.6); }
+
+/* ════════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════════ */
+@media (max-width: 900px) {
+  section { padding: 80px 0; }
+  .hero { min-height: 100svh; padding-bottom: 60px; }
+  .hero-stat-row { grid-template-columns: 1fr; }
+  .hero-stat { border-radius: 0 !important; }
+  .hero-stat:first-child { border-radius: 18px 18px 0 0 !important; }
+  .hero-stat:last-child  { border-radius: 0 0 18px 18px !important; }
+  .journey-head { grid-template-columns: 1fr; gap: 24px; margin-bottom: 56px; }
+  .journey-steps { grid-template-columns: 1fr 1fr; gap: 20px; }
+  .journey-steps::before { display: none; }
+  .why-grid { grid-template-columns: 1fr; gap: 16px; }
+  .phases { grid-template-columns: 1fr 1fr; }
+  .takeaways { grid-template-columns: 1fr; }
+  .impact-head { grid-template-columns: 1fr; gap: 24px; }
+  .impact-grid { grid-template-columns: 1fr; }
+  .support-grid { grid-template-columns: 1fr; }
+  .framing-card { grid-template-columns: 1fr; gap: 40px; padding: 44px 32px; }
+  .budget-layout { grid-template-columns: 1fr; }
+  .budget-total-card { position: static; }
+  .outcomes-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  section { padding: 64px 0; }
+  .wrap { width: min(100% - 32px, 1160px); }
+  .day-card { padding: 36px 28px; }
+  .day-top-row { flex-direction: column; gap: 20px; }
+  .day-price { text-align: left; }
+  .phases { grid-template-columns: 1fr; }
+  .journey-steps { grid-template-columns: 1fr; }
+  .framing-card { padding: 36px 24px; }
+  .budget-lines { padding: 32px 28px; }
+  .budget-total-card { padding: 36px 28px; }
+  .why-card { min-height: unset; padding: 36px 28px; }
+  .why-large-num { font-size: 100px; }
+}
+</style>
+</head>
+<body>
+
+<div class="ambient-layer" aria-hidden="true">
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+</div>
+
+<!-- ════════ HERO ════════ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow reveal">
+      <span class="eyebrow">Reality Center · Community Wellness Initiative</span>
+    </div>
+
+    <h1 class="hero-title reveal reveal-delay-1">
+      Two Days.<br>
+      <em>Two Worlds.</em><br>
+      One Healing.
+    </h1>
+
+    <p class="body-lg reveal reveal-delay-2" style="max-width:54ch; color: var(--soft);">
+      A high-touch, trauma-informed program for 24 elders, families, and community members — blending immersive technology with nature-based healing into a single, cohesive journey.
+    </p>
+
+    <div class="hero-meta reveal reveal-delay-3">
+      <span class="hero-tag">Ho-Chunk Nation</span>
+      <span class="hero-tag">Santa Monica + Palmdale</span>
+      <span class="hero-tag">24 Participants</span>
+      <span class="hero-tag">Elder Wellness · Trauma Recovery</span>
+    </div>
+
+    <div class="hero-stat-row reveal reveal-delay-4">
+      <div class="hero-stat">
+        <div class="stat-label">Participants</div>
+        <div class="stat-num">24</div>
+        <div class="stat-note">Intimate cohort — depth over scale</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-label">Total Program Budget</div>
+        <div class="stat-num">$150K</div>
+        <div class="stat-note">Full delivery, logistics & reporting</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-label">Cost Per Participant</div>
+        <div class="stat-num">$6,250</div>
+        <div class="stat-note">Both days, lodging, meals, transport</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ JOURNEY ════════ -->
+<section class="journey-section">
+  <div class="wrap">
+    <div class="journey-head">
+      <div>
+        <span class="eyebrow reveal">Participant Journey</span>
+        <h2 class="reveal reveal-delay-1" style="margin-top: 20px;">Regulation<br>to Integration</h2>
+      </div>
+      <div>
+        <p class="body-lg reveal reveal-delay-2">
+          The program is sequenced so participants first find safety, then move into connection, transformation, and lasting integration — one stage building on the last.
+        </p>
+      </div>
+    </div>
+
+    <div class="journey-steps">
+      <div class="journey-step reveal">
+        <div class="step-num">01</div>
+        <div class="step-title">Regulate</div>
+        <p class="step-desc">Breathwork, cultural grounding, and immersive sound therapy calm the nervous system and prepare the group for depth.</p>
+      </div>
+      <div class="journey-step reveal reveal-delay-1">
+        <div class="step-num">02</div>
+        <div class="step-title">Connect</div>
+        <p class="step-desc">Storytelling and circle-based reflection build trust, shared presence, and emotional safety within the group.</p>
+      </div>
+      <div class="journey-step reveal reveal-delay-2">
+        <div class="step-num">03</div>
+        <div class="step-title">Transform</div>
+        <p class="step-desc">Wolf immersion and nature-based engagement create embodied learning around presence, trust, and renewal.</p>
+      </div>
+      <div class="journey-step reveal reveal-delay-3">
+        <div class="step-num">04</div>
+        <div class="step-title">Integrate</div>
+        <p class="step-desc">Closing reflection, ceremony, and take-home tools anchor the experience into continued programming pathways.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ WHY THIS WORKS ════════ -->
+<section>
+  <div class="wrap">
+    <span class="eyebrow reveal">Why This Works</span>
+    <h2 class="reveal reveal-delay-1" style="margin: 20px 0 56px; max-width: 14ch;">Two environments. One complete system.</h2>
+
+    <div class="why-grid">
+      <div class="glass why-card teal reveal">
+        <div class="why-large-num">1</div>
+        <div class="why-body">
+          <span class="why-icon">Technology · Day 1</span>
+          <h3>Clinical precision inside Reality Center</h3>
+          <p class="body-sm" style="margin-top: 12px;">Wave tables, binaural frequencies, and vibration therapy deliver measurable nervous system regulation in a controlled, high-support environment.</p>
+          <ul class="why-points">
+            <li>Immersive multi-sensory experience</li>
+            <li>Veteran-proven integration framework</li>
+            <li>Six-person intimate rotations</li>
+            <li>Clear, observable transformation</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="glass why-card amber reveal reveal-delay-1">
+        <div class="why-large-num">2</div>
+        <div class="why-body">
+          <span class="why-icon">Nature · Day 2</span>
+          <h3>Wild presence at Wolf Connection, Palmdale</h3>
+          <p class="body-sm" style="margin-top: 12px;">Animal-assisted healing, meditation pad activation, and sunset ceremony demonstrate how these tools translate across settings — making them accessible to any community.</p>
+          <ul class="why-points">
+            <li>Nature-based therapeutic engagement</li>
+            <li>Reality Center technology in the field</li>
+            <li>Culturally resonant ceremony</li>
+            <li>Adaptable to elder, youth, and trauma populations</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ THE DAYS ════════ -->
+<section>
+  <div class="wrap">
+    <div class="days-head">
+      <span class="eyebrow reveal">Experience Delivery</span>
+      <h2 class="reveal reveal-delay-1">Day by Day</h2>
+      <p class="body-lg reveal reveal-delay-2">Each day has its own therapeutic role and its own cost center — making the program easy to understand, easy to budget, and easy to support.</p>
+    </div>
+
+    <div class="days-stack">
+
+      <!-- DAY 1 -->
+      <article class="glass day-card day1 reveal">
+        <div class="day-top-row">
+          <div class="day-label-block">
+            <div class="day-label">Day 1 · Reality Center · Santa Monica</div>
+            <h3>Nervous System Reset +<br>Community Activation</h3>
+          </div>
+          <div class="day-price">
+            <span class="day-price-num">$32K</span>
+            <div class="day-price-label">Experience Delivery</div>
+          </div>
+        </div>
+
+        <div class="day-body">
+          <p class="body-sm" style="max-width: 72ch; margin-bottom: 36px;">24 elders from the Ho-Chunk Nation arrive in Santa Monica and are welcomed into ceremony. The group moves through four intimate six-person sessions using a veteran-style integration framework, shared meals, grounding practices, and structured reflection before overnight lodging at Shore Hotel.</p>
+
+          <div class="phases">
+            <div class="phase">
+              <div class="phase-time">Morning</div>
+              <div class="phase-desc">Welcome circle, cultural grounding, storytelling, and guided nervous system preparation.</div>
+            </div>
+            <div class="phase">
+              <div class="phase-time">Midday</div>
+              <div class="phase-desc">Wave table sessions, binaural beats, vibration, and immersive sound therapy.</div>
+            </div>
+            <div class="phase">
+              <div class="phase-time">Afternoon</div>
+              <div class="phase-desc">Howls That Heal pop-up, trust education, and a sensory preview of Day 2.</div>
+            </div>
+            <div class="phase">
+              <div class="phase-time">Evening</div>
+              <div class="phase-desc">Journaling, shared reflection, dinner, and overnight lodging for restoration.</div>
+            </div>
+          </div>
+
+          <ul class="takeaways">
+            <li>Four rotations with six participants per group</li>
+            <li>Trauma-informed facilitation throughout</li>
+            <li>Food, reflection, and communal support built in</li>
+            <li>Participants leave regulated and ready for Day 2</li>
+          </ul>
+
+          <div class="day-outcome">
+            <div class="outcome-label">Day 1 Outcome</div>
+            <div class="outcome-text">Participants feel safe, grounded, and prepared — nervous systems regulated, trust established, community formed.</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- DAY 2 -->
+      <article class="glass day-card day2 reveal">
+        <div class="day-top-row">
+          <div class="day-label-block">
+            <div class="day-label">Day 2 · Wolf Connection · Palmdale</div>
+            <h3>Nature-Based Healing +<br>Wolf Immersion</h3>
+          </div>
+          <div class="day-price">
+            <span class="day-price-num">$28K</span>
+            <div class="day-price-label">Experience Delivery</div>
+          </div>
+        </div>
+
+        <div class="day-body">
+          <p class="body-sm" style="max-width: 72ch; margin-bottom: 36px;">After breakfast, participants are transported from Shore Hotel to the wolf sanctuary. A guided opening ceremony with the wolves, Reality Center meditation pads, nature immersion, emotional regulation exercises, and a sunset integration ceremony ground the experience in reflection, release, and renewal.</p>
+
+          <div class="phases">
+            <div class="phase">
+              <div class="phase-time">Morning</div>
+              <div class="phase-desc">Breakfast, transport, arrival, orientation, and opening ceremony with the wolves.</div>
+            </div>
+            <div class="phase">
+              <div class="phase-time">Core</div>
+              <div class="phase-desc">Guided wolf interaction, trust and boundary work, emotional awareness exercises.</div>
+            </div>
+            <div class="phase">
+              <div class="phase-time">Midday</div>
+              <div class="phase-desc">Meditation pad activation, mindful walking, nature immersion, and small-group processing.</div>
+            </div>
+            <div class="phase">
+              <div class="phase-time">Sunset</div>
+              <div class="phase-desc">Gratitude practice, symbolic release, collective sound release, and closing intentions.</div>
+            </div>
+          </div>
+
+          <ul class="takeaways">
+            <li>Each participant receives a Reality Center meditation pad</li>
+            <li>Technology demonstrated in a natural, culturally resonant setting</li>
+            <li>Accessible to elders, at-risk youth, and broader community</li>
+            <li>Shows clear pathway for future community deployment</li>
+          </ul>
+
+          <div class="day-outcome">
+            <div class="outcome-label">Day 2 Outcome</div>
+            <div class="outcome-text">Participants leave with an embodied experience of trust, presence, and renewal — and a take-home tool to continue the practice.</div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ════════ IMPACT ════════ -->
+<section class="impact-section">
+  <div class="wrap">
+    <div class="impact-head">
+      <div>
+        <span class="eyebrow reveal">Strategic Value</span>
+        <h2 class="reveal reveal-delay-1" style="margin-top: 20px;">Built for communities that need it most.</h2>
+      </div>
+      <div>
+        <p class="body-lg reveal reveal-delay-2">This program creates a replicable model that can serve multiple populations and open doors to sustainable funding pathways.</p>
+      </div>
+    </div>
+
+    <div class="impact-grid">
+      <div class="glass-sm impact-card reveal">
+        <div class="impact-icon">🌿</div>
+        <h4>Elder Wellness</h4>
+        <p>A culturally grounded, high-touch experience designed with the specific needs of elders — accessibility, pacing, and traditional framing built in.</p>
+      </div>
+      <div class="glass-sm impact-card reveal reveal-delay-1">
+        <div class="impact-icon">🛡️</div>
+        <h4>Prevention &amp; At-Risk Support</h4>
+        <p>Demonstrates clear relevance to suicide prevention, trauma recovery, youth programming, and at-risk community pathways — credible for funders.</p>
+      </div>
+      <div class="glass-sm impact-card reveal reveal-delay-2">
+        <div class="impact-icon">🔁</div>
+        <h4>Future Scalability</h4>
+        <p>A proven, repeatable model. The same two-day framework can be adapted for veterans, youth, corporate wellness, and other tribal nations.</p>
+      </div>
+    </div>
+
+    <div class="support-grid">
+      <div class="glass-sm support-card reveal">
+        <div class="support-num">01</div>
+        <h4>Participant Logistics</h4>
+        <ul class="support-list">
+          <li>Arrival coordination and local transfers</li>
+          <li>Charter transport Santa Monica → Palmdale</li>
+          <li>Shore Hotel lodging for all participants</li>
+          <li>Meals, refreshments, and accessibility support</li>
+        </ul>
+      </div>
+      <div class="glass-sm support-card reveal reveal-delay-1">
+        <div class="support-num">02</div>
+        <h4>What Partners Can See</h4>
+        <ul class="support-list">
+          <li>Immersive tech working in a therapeutic setting</li>
+          <li>Tools translated into nature and community contexts</li>
+          <li>A credible model for elders, veterans, and youth</li>
+          <li>Clear enrollment and programming pathways</li>
+        </ul>
+      </div>
+      <div class="glass-sm support-card reveal reveal-delay-2">
+        <div class="support-num">03</div>
+        <h4>What Participants Leave With</h4>
+        <ul class="support-list">
+          <li>A Reality Center meditation pad to take home</li>
+          <li>Tools for continued nervous system regulation</li>
+          <li>A shared experience rooted in trust and presence</li>
+          <li>An optional pathway into continued programming</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ STRATEGIC FRAMING ════════ -->
+<section>
+  <div class="wrap">
+    <div class="glass framing-card reveal">
+      <div class="framing-body">
+        <span class="eyebrow">Strategic Framing</span>
+        <h2 style="margin: 20px 0 24px;">Positioned for real-world funding pathways</h2>
+        <p class="body-sm" style="max-width: 52ch;">Because this program demonstrates both deep immersion and broad accessibility, it opens conversations around suicide prevention, elder wellness, youth programming, trauma recovery, and community health initiatives.</p>
+        <div class="chips">
+          <span class="chip">Elder Wellness</span>
+          <span class="chip">Suicide Prevention</span>
+          <span class="chip">At-Risk Youth</span>
+          <span class="chip">Community Healing</span>
+          <span class="chip">Cultural Programming</span>
+          <span class="chip">Trauma Recovery</span>
+        </div>
+      </div>
+      <div class="framing-quote">
+        <div class="quote-label">Program Logic</div>
+        <h3>Day 1 proves immersion.<br>Day 2 proves accessibility.</h3>
+        <p>Together they create a model that is emotionally resonant, operationally grounded, and easier for a first-time audience to understand and fund.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ BUDGET ════════ -->
+<section class="budget-section">
+  <div class="wrap">
+    <div class="budget-head">
+      <span class="eyebrow reveal">Budget Architecture</span>
+      <h2 class="reveal reveal-delay-1">Built around execution,<br>not abstraction.</h2>
+      <p class="body-lg reveal reveal-delay-2">Every line item maps directly to how the program runs — no padding, no mystery.</p>
+    </div>
+
+    <div class="budget-layout">
+
+      <div class="glass budget-total-card reveal">
+        <!-- SVG ring chart -->
+        <div class="budget-ring-wrap">
+          <svg class="budget-ring-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#7EEDC4"/>
+                <stop offset="100%" stop-color="#6DD5FF"/>
+              </linearGradient>
+            </defs>
+            <!-- background track -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="20"/>
+            <!-- Day 1: 21.3% = 107.7deg -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="url(#g1)" stroke-width="20"
+              stroke-dasharray="107.7 395.3" stroke-dashoffset="100.5" stroke-linecap="round"/>
+            <!-- Day 2: 18.7% -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="#F0C060" stroke-width="20" stroke-opacity="0.8"
+              stroke-dasharray="94.5 408.5" stroke-dashoffset="-7.2" stroke-linecap="round"/>
+            <!-- Staffing: 13.3% -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="#6DD5FF" stroke-width="20" stroke-opacity="0.5"
+              stroke-dasharray="67.4 435.6" stroke-dashoffset="-101.7" stroke-linecap="round"/>
+            <!-- Program design: 10% -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(126,237,196,0.5)" stroke-width="20"
+              stroke-dasharray="50.3 452.7" stroke-dashoffset="-169.1" stroke-linecap="round"/>
+            <!-- Lodging: 12% -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(109,213,255,0.35)" stroke-width="20"
+              stroke-dasharray="60.3 442.7" stroke-dashoffset="-219.4" stroke-linecap="round"/>
+            <!-- Rest -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="20"
+              stroke-dasharray="123.5 379.5" stroke-dashoffset="-279.7" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="budget-total-num">$150K</span>
+        <div class="budget-total-label">Total Program Budget</div>
+        <p class="budget-per">$<span>6,250</span> per participant</p>
+        <p class="body-sm" style="margin-top: 12px; font-size: 13px;">Includes both environments, full participant support, trauma-informed facilitation, and outcomes reporting.</p>
+      </div>
+
+      <div class="glass budget-lines reveal reveal-delay-1">
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Day 1 — Reality Center experience</span>
+            <span class="budget-line-amt">$32,000 · 21.3%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill teal" style="width:100%" data-pct="0.213"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Day 2 — Wolf Connection experience</span>
+            <span class="budget-line-amt">$28,000 · 18.7%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill teal" style="width:87.8%" data-pct="0.187"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Facilitation + staffing</span>
+            <span class="budget-line-amt">$20,000 · 13.3%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill dim" style="width:62.4%" data-pct="0.133"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Lodging (Shore Hotel)</span>
+            <span class="budget-line-amt">$18,000 · 12.0%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill dim" style="width:56.3%" data-pct="0.120"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Program design + clinical oversight</span>
+            <span class="budget-line-amt">$15,000 · 10.0%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill dim" style="width:46.9%" data-pct="0.100"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Transportation</span>
+            <span class="budget-line-amt">$12,000 · 8.0%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill muted" style="width:37.6%" data-pct="0.080"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Meals + hospitality</span>
+            <span class="budget-line-amt">$10,000 · 6.7%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill muted" style="width:31.5%" data-pct="0.067"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Participant support + accessibility</span>
+            <span class="budget-line-amt">$5,000 · 3.3%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill muted" style="width:15.5%" data-pct="0.033"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Evaluation + outcomes reporting</span>
+            <span class="budget-line-amt">$5,000 · 3.3%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill muted" style="width:15.5%" data-pct="0.033"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Administration / project management</span>
+            <span class="budget-line-amt">$3,000 · 2.0%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill muted" style="width:9.4%" data-pct="0.020"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Contingency</span>
+            <span class="budget-line-amt">$2,000 · 1.3%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill muted" style="width:6.1%" data-pct="0.013"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ OUTCOMES ════════ -->
+<section>
+  <div class="wrap">
+    <span class="eyebrow reveal">Outcomes &amp; Reporting</span>
+    <h2 class="reveal reveal-delay-1" style="margin: 20px 0 56px; max-width: 14ch;">How impact gets documented.</h2>
+    <div class="outcomes-grid">
+      <div class="glass-sm outcome-card reveal">
+        <div class="outcome-kicker">Before / After</div>
+        <h4>Regulation Indicators</h4>
+        <p class="body-sm" style="margin-top: 10px;">Pre/post wellness check-ins document perceived stress reduction, grounding, and emotional safety — creating a clear, shareable data story.</p>
+      </div>
+      <div class="glass-sm outcome-card reveal reveal-delay-1">
+        <div class="outcome-kicker">Engagement Quality</div>
+        <h4>Participation Depth</h4>
+        <p class="body-sm" style="margin-top: 10px;">Attendance, completion, qualitative themes from sharing circles, and staff observations show experience resonance that numbers alone can't capture.</p>
+      </div>
+      <div class="glass-sm outcome-card reveal reveal-delay-2">
+        <div class="outcome-kicker">Continuation</div>
+        <h4>Pathways Forward</h4>
+        <p class="body-sm" style="margin-top: 10px;">Follow-up interest, referrals into continued programming, and partner feedback inform future rollouts — building the case for scale.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ FOOTER ════════ -->
+<footer>
+  <div class="footer-logo">Reality Center · Immersive Healing Systems</div>
+  <div class="footer-note">Designed to make complex wellness experiences clear, elevated, and fundable.</div>
+</footer>
+
+<script>
+(function() {
+  // Reveal on scroll
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(function(el) {
+    observer.observe(el);
+  });
+
+  // Budget bar animation
+  const budgetObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.budget-fill').forEach(function(fill) {
+          fill.classList.add('animated');
+        });
+        budgetObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  const budgetSection = document.querySelector('.budget-layout');
+  if (budgetSection) budgetObserver.observe(budgetSection);
+
+  // Set initial scaleX to 0 via JS to avoid FOUC from CSS
+  document.querySelectorAll('.budget-fill').forEach(function(fill) {
+    fill.style.transform = 'scaleX(0)';
+  });
+})();
+</script>
+</body>
+</html>
