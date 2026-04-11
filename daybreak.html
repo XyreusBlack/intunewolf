@@ -1,0 +1,1355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission Daybreak — Reality Management Technologies</title>
+<style>
+:root {
+  --bg: #060809;
+  --surface: rgba(255,255,255,0.028);
+  --surface-hover: rgba(255,255,255,0.048);
+  --border: rgba(255,255,255,0.07);
+  --border-soft: rgba(255,255,255,0.04);
+  --text: #EDF0EC;
+  --muted: #8A9690;
+  --soft: #C8D8D0;
+  --teal: #7EEDC4;
+  --teal-dim: rgba(126,237,196,0.12);
+  --teal-glow: rgba(126,237,196,0.22);
+  --cyan: #6DD5FF;
+  --cyan-dim: rgba(109,213,255,0.10);
+  --amber: #F0C060;
+  --amber-dim: rgba(240,192,96,0.10);
+  --amber-glow: rgba(240,192,96,0.20);
+  --red-dim: rgba(255,80,80,0.10);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ── AMBIENT LAYER ── */
+.ambient-layer {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+}
+.ambient-orb {
+  position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.35;
+  animation: driftOrb 20s ease-in-out infinite alternate;
+}
+.ambient-orb:nth-child(1) {
+  width: 60vw; height: 60vw; top: -20%; left: -10%;
+  background: radial-gradient(circle, rgba(126,237,196,0.25), transparent 70%);
+  animation-duration: 22s;
+}
+.ambient-orb:nth-child(2) {
+  width: 50vw; height: 50vw; top: 10%; right: -10%;
+  background: radial-gradient(circle, rgba(109,213,255,0.2), transparent 70%);
+  animation-duration: 18s; animation-delay: -8s;
+}
+.ambient-orb:nth-child(3) {
+  width: 45vw; height: 45vw; bottom: -15%; left: 30%;
+  background: radial-gradient(circle, rgba(126,237,196,0.15), transparent 70%);
+  animation-duration: 25s; animation-delay: -12s;
+}
+@keyframes driftOrb {
+  0%   { transform: translate(0,0) scale(1); }
+  100% { transform: translate(30px, -20px) scale(1.08); }
+}
+
+body::before {
+  content: "";
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.014) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.014) 1px, transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black, transparent);
+}
+
+/* ── LAYOUT ── */
+.wrap { position: relative; z-index: 1; width: min(100% - 40px, 1160px); margin: 0 auto; }
+section { padding: 120px 0; }
+section:first-child { padding-top: 0; }
+
+/* ── TYPOGRAPHY ── */
+.eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: "Courier New", monospace; font-size: 11px;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted);
+}
+.eyebrow::before {
+  content: ""; display: block; width: 24px; height: 1px;
+  background: linear-gradient(90deg, var(--teal), transparent);
+}
+h1 {
+  font-size: clamp(44px, 7.5vw, 110px); line-height: 0.92;
+  letter-spacing: -0.04em; font-weight: 300; color: var(--text);
+}
+h1 em { font-style: normal; color: var(--teal); }
+h2 { font-size: clamp(32px, 4.5vw, 64px); line-height: 0.96; letter-spacing: -0.04em; font-weight: 300; }
+h3 { font-size: clamp(20px, 2.5vw, 28px); line-height: 1.1; letter-spacing: -0.025em; font-weight: 400; }
+h4 { font-size: 18px; line-height: 1.2; letter-spacing: -0.02em; font-weight: 500; }
+p.body-lg { font-size: clamp(17px, 1.6vw, 20px); line-height: 1.75; color: var(--soft); }
+p.body-sm { font-size: 15px; line-height: 1.7; color: var(--muted); }
+
+/* ── GLASS ── */
+.glass {
+  background: linear-gradient(160deg, rgba(20,32,28,0.7), rgba(10,16,14,0.55));
+  border: 1px solid var(--border); border-radius: 28px;
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+}
+.glass-sm { background: var(--surface); border: 1px solid var(--border-soft); border-radius: 18px; }
+
+/* ── REVEAL ── */
+.reveal {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity 0.9s cubic-bezier(0.22,1,0.36,1), transform 0.9s cubic-bezier(0.22,1,0.36,1);
+}
+.reveal.in { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ══ HERO ══ */
+.hero {
+  min-height: 100svh; display: flex; flex-direction: column;
+  justify-content: flex-end; padding-bottom: 80px;
+}
+.hero-inner {
+  position: relative; z-index: 1;
+  width: min(100% - 40px, 1160px); margin: 0 auto;
+}
+.hero-eyebrow { margin-bottom: 40px; }
+.hero-title { margin-bottom: 36px; }
+.hero-meta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 40px; }
+.hero-tag {
+  font-family: "Courier New", monospace; font-size: 11px;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+  padding: 8px 16px; border: 1px solid var(--border); border-radius: 999px;
+  background: var(--surface);
+}
+.hero-stat-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 2px; margin-top: 60px;
+}
+.hero-stat {
+  padding: 28px 32px; background: var(--surface);
+  border: 1px solid var(--border-soft);
+}
+.hero-stat:first-child { border-radius: 20px 0 0 20px; }
+.hero-stat:last-child  { border-radius: 0 20px 20px 0; }
+.stat-num {
+  font-size: clamp(36px, 4vw, 52px); line-height: 1;
+  letter-spacing: -0.05em; color: var(--text); margin-bottom: 8px;
+}
+.stat-label {
+  font-family: "Courier New", monospace; font-size: 10px;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 6px;
+}
+.stat-note { font-size: 14px; color: var(--muted); line-height: 1.5; }
+
+/* ══ JOURNEY ══ */
+.journey-head {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+  align-items: end; margin-bottom: 80px;
+}
+.journey-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; position: relative; }
+.journey-steps::before {
+  content: ""; position: absolute; top: 28px; left: 8%; right: 8%; height: 1px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(126,237,196,0.3) 20%,
+    rgba(109,213,255,0.5) 50%,
+    rgba(126,237,196,0.3) 80%,
+    transparent);
+  z-index: 0;
+}
+.journey-step {
+  position: relative; z-index: 1; display: flex;
+  flex-direction: column; align-items: center; text-align: center; padding: 0 16px;
+}
+.step-num {
+  width: 56px; height: 56px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: "Courier New", monospace; font-size: 13px; letter-spacing: 0.05em;
+  color: var(--teal);
+  background: linear-gradient(135deg, rgba(126,237,196,0.12), rgba(109,213,255,0.08));
+  border: 1px solid rgba(126,237,196,0.2); margin-bottom: 28px; flex-shrink: 0;
+}
+.step-title { font-size: 20px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 14px; color: var(--text); }
+.step-desc { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+/* ══ WHY GRID ══ */
+.why-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.why-card {
+  padding: 48px 40px; position: relative; overflow: hidden;
+  min-height: 360px; display: flex; flex-direction: column; justify-content: flex-end;
+}
+.why-card::before {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+}
+.why-card.teal::before { background: radial-gradient(circle at 80% 20%, rgba(126,237,196,0.14), transparent 60%); }
+.why-card.amber::before { background: radial-gradient(circle at 80% 20%, rgba(240,192,96,0.14), transparent 60%); }
+.why-icon {
+  font-family: "Courier New", monospace; font-size: 11px; letter-spacing: 0.2em;
+  text-transform: uppercase; margin-bottom: 20px; padding: 8px 14px;
+  border-radius: 999px; display: inline-block; width: fit-content;
+}
+.why-card.teal .why-icon { color: var(--teal); border: 1px solid rgba(126,237,196,0.25); background: var(--teal-dim); }
+.why-card.amber .why-icon { color: var(--amber); border: 1px solid rgba(240,192,96,0.25); background: var(--amber-dim); }
+.why-large-num {
+  position: absolute; top: 32px; right: 32px; font-size: 140px; line-height: 1;
+  letter-spacing: -0.08em; font-weight: 700; opacity: 0.05; user-select: none;
+}
+.why-body { position: relative; z-index: 1; }
+.why-body h3 { margin-bottom: 16px; }
+.why-points { list-style: none; margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
+.why-points li { font-size: 14px; color: var(--muted); padding-left: 18px; position: relative; line-height: 1.6; }
+.why-card.teal .why-points li::before { content: "·"; position: absolute; left: 0; color: var(--teal); font-size: 18px; line-height: 1.1; }
+.why-card.amber .why-points li::before { content: "·"; position: absolute; left: 0; color: var(--amber); font-size: 18px; line-height: 1.1; }
+
+/* ══ UCLA DATA ══ */
+.ucla-section { background: transparent; }
+.ucla-head { text-align: center; max-width: 680px; margin: 0 auto 80px; }
+.ucla-head h2 { margin: 20px 0 24px; }
+.ucla-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 48px; }
+.ucla-card { padding: 36px 30px; display: flex; flex-direction: column; gap: 16px; }
+.ucla-kicker {
+  font-family: "Courier New", monospace; font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 4px;
+}
+.ucla-big {
+  font-size: clamp(44px, 5vw, 68px); line-height: 1; letter-spacing: -0.06em;
+  color: var(--teal); font-weight: 300;
+}
+.ucla-big span { font-size: 0.45em; color: var(--muted); vertical-align: super; }
+.ucla-card p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+/* Pre/Post bars */
+.score-compare { margin-top: 12px; }
+.score-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.score-label { display: flex; justify-content: space-between; align-items: center; }
+.score-label span { font-family: "Courier New", monospace; font-size: 10px; letter-spacing: 0.14em; color: var(--muted); text-transform: uppercase; }
+.score-label strong { font-size: 14px; color: var(--soft); font-weight: 500; }
+.bar-track { width: 100%; height: 5px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: inherit; transform: scaleX(0); transform-origin: left; transition: transform 1.4s cubic-bezier(0.22,1,0.36,1); }
+.bar-fill.pre  { background: rgba(138,150,144,0.4); }
+.bar-fill.post { background: linear-gradient(90deg, var(--teal), var(--cyan)); box-shadow: 0 0 10px var(--teal-glow); }
+.bar-fill.animated { transform: scaleX(1); }
+
+/* sig badge */
+.sig-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border-radius: 999px; font-size: 12px;
+  font-family: "Courier New", monospace; letter-spacing: 0.08em;
+  background: var(--teal-dim); border: 1px solid rgba(126,237,196,0.25);
+  color: var(--teal); margin-top: 8px;
+}
+.sig-badge::before { content: "✓"; font-size: 11px; }
+
+/* big quote card */
+.quote-card {
+  padding: 64px 60px; position: relative; overflow: hidden;
+  margin-top: 24px;
+}
+.quote-card::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: linear-gradient(180deg, var(--teal), var(--cyan));
+  border-radius: 0 2px 2px 0;
+}
+.quote-card blockquote { font-size: clamp(17px, 1.8vw, 22px); line-height: 1.75; color: var(--soft); font-style: italic; max-width: 76ch; }
+.quote-card cite { display: block; margin-top: 24px; font-family: "Courier New", monospace; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--teal); font-style: normal; }
+
+/* disability grid */
+.disability-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 48px; }
+.dis-card { padding: 28px 24px; }
+.dis-pct { font-size: 42px; line-height: 1; letter-spacing: -0.05em; margin-bottom: 10px; }
+.dis-pct.teal  { color: var(--teal); }
+.dis-pct.cyan  { color: var(--cyan); }
+.dis-pct.amber { color: var(--amber); }
+.dis-label { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* ══ SOLUTION ══ */
+.solution-layout {
+  display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; align-items: start;
+}
+.solution-main { padding: 56px 52px; position: relative; overflow: hidden; }
+.solution-main::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(circle at 90% 10%, rgba(126,237,196,0.09), transparent 50%);
+  pointer-events: none;
+}
+.solution-aside { display: flex; flex-direction: column; gap: 16px; }
+.solution-pill {
+  padding: 28px 28px; display: flex; flex-direction: column; gap: 12px;
+}
+.pill-icon {
+  width: 42px; height: 42px; border-radius: 12px;
+  background: var(--teal-dim); border: 1px solid rgba(126,237,196,0.15);
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.solution-pill h4 { color: var(--text); }
+.solution-pill p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+.modality-row { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+.modality-item {
+  display: flex; gap: 16px; align-items: center;
+  padding: 14px 20px; border-radius: 14px;
+  background: var(--surface); border: 1px solid var(--border-soft);
+}
+.modality-icon {
+  width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
+  background: var(--teal-dim); border: 1px solid rgba(126,237,196,0.15);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.modality-text h4 { font-size: 15px; margin-bottom: 2px; }
+.modality-text p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+/* ══ EVIDENCE ══ */
+.evidence-head {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 48px;
+  align-items: end; margin-bottom: 64px;
+}
+.evidence-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.evidence-card { padding: 36px 30px; display: flex; flex-direction: column; gap: 16px; }
+.evidence-card .evi-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: var(--teal-dim); border: 1px solid rgba(126,237,196,0.15);
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.evidence-card h4 { color: var(--text); }
+.evidence-card p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+/* ══ IMPLEMENTATION ══ */
+.impl-head { text-align: center; max-width: 640px; margin: 0 auto 80px; }
+.impl-head h2 { margin: 20px 0 24px; }
+.impl-stack { display: flex; flex-direction: column; gap: 24px; }
+.impl-card { padding: 52px 52px; position: relative; overflow: hidden; }
+.impl-card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(circle at 95% 10%, rgba(126,237,196,0.08), transparent 40%);
+  pointer-events: none;
+}
+.impl-top-row {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 32px; margin-bottom: 36px; padding-bottom: 36px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.impl-phase-label {
+  font-family: "Courier New", monospace; font-size: 11px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.impl-phase-label::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--teal); box-shadow: 0 0 12px var(--teal);
+}
+.impl-num {
+  font-size: clamp(38px, 4vw, 56px); line-height: 1;
+  letter-spacing: -0.05em; color: var(--teal); display: block; flex-shrink: 0;
+}
+.impl-body { position: relative; z-index: 1; }
+.impl-body > p { margin-bottom: 28px; }
+.impl-points { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 28px; }
+.impl-points li {
+  font-size: 14px; color: var(--soft); padding-left: 16px; position: relative; line-height: 1.55;
+}
+.impl-points li::before {
+  content: "→"; position: absolute; left: 0; color: var(--teal); font-size: 12px;
+}
+.impl-outcome {
+  margin-top: 28px; padding: 18px 22px; border-radius: 14px;
+  border-left: 3px solid var(--teal); background: var(--teal-dim);
+}
+.impl-outcome-label {
+  font-family: "Courier New", monospace; font-size: 10px; letter-spacing: 0.2em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+}
+.impl-outcome-text { font-size: 15px; color: var(--soft); line-height: 1.6; }
+
+/* ══ TEAM ══ */
+.team-head { text-align: center; max-width: 560px; margin: 0 auto 72px; }
+.team-head h2 { margin: 20px 0 24px; }
+.team-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.team-card { padding: 36px 30px; display: flex; flex-direction: column; gap: 14px; }
+.team-initial {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: linear-gradient(135deg, rgba(126,237,196,0.15), rgba(109,213,255,0.1));
+  border: 1px solid rgba(126,237,196,0.2); display: flex; align-items: center;
+  justify-content: center; font-size: 20px; font-weight: 300; color: var(--teal);
+  font-family: "Courier New", monospace; letter-spacing: -0.04em;
+}
+.team-card h4 { color: var(--text); }
+.team-role {
+  font-family: "Courier New", monospace; font-size: 10px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 4px;
+}
+.team-card p { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+/* ══ ENGAGEMENT MODELS ══ */
+.eng-head { text-align: center; max-width: 640px; margin: 0 auto 80px; }
+.eng-head h2 { margin: 20px 0 24px; }
+.eng-stack { display: flex; flex-direction: column; gap: 20px; }
+.eng-card { padding: 52px 52px; position: relative; overflow: hidden; }
+.eng-card.featured {
+  background: linear-gradient(160deg, rgba(20,40,32,0.85), rgba(10,20,16,0.7));
+  border-color: rgba(126,237,196,0.2);
+}
+.eng-card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit;
+  background: radial-gradient(circle at 95% 10%, rgba(126,237,196,0.08), transparent 50%);
+  pointer-events: none;
+}
+.eng-top {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 32px; margin-bottom: 32px;
+}
+.eng-option {
+  font-family: "Courier New", monospace; font-size: 10px; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--teal); margin-bottom: 10px;
+}
+.eng-recommended {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 12px; border-radius: 999px; font-size: 11px;
+  font-family: "Courier New", monospace; letter-spacing: 0.12em;
+  background: var(--teal-dim); border: 1px solid rgba(126,237,196,0.3);
+  color: var(--teal); margin-top: 10px;
+}
+.eng-price-block { text-align: right; flex-shrink: 0; }
+.eng-price {
+  font-size: clamp(32px, 3.5vw, 48px); line-height: 1; letter-spacing: -0.05em;
+  color: var(--teal); display: block; margin-bottom: 4px;
+}
+.eng-price-note {
+  font-family: "Courier New", monospace; font-size: 10px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--muted);
+}
+.eng-body p { font-size: 15px; color: var(--muted); line-height: 1.7; margin-bottom: 24px; }
+.eng-points { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 10px 28px; }
+.eng-points li { font-size: 14px; color: var(--soft); padding-left: 16px; position: relative; line-height: 1.55; }
+.eng-points li::before { content: "·"; position: absolute; left: 0; color: var(--teal); font-size: 20px; line-height: 0.8; }
+.eng-timeline {
+  margin-top: 24px; padding: 14px 20px; border-radius: 12px;
+  background: var(--surface); border: 1px solid var(--border-soft);
+  display: flex; gap: 24px; flex-wrap: wrap;
+}
+.eng-tl-item { display: flex; flex-direction: column; gap: 2px; }
+.eng-tl-label { font-family: "Courier New", monospace; font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+.eng-tl-val { font-size: 14px; color: var(--soft); }
+
+/* ══ FRAMING ══ */
+.framing-card {
+  padding: 72px 64px; display: grid; grid-template-columns: 1.2fr 0.8fr;
+  gap: 64px; align-items: center; position: relative; overflow: hidden;
+}
+.framing-card::before {
+  content: ""; position: absolute; width: 400px; height: 400px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(126,237,196,0.06), transparent 70%);
+  right: -80px; top: -80px; pointer-events: none;
+}
+.framing-body h2 { margin: 20px 0 24px; }
+.chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 28px; }
+.chip { padding: 9px 16px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: 13px; color: var(--soft); }
+.framing-quote {
+  padding: 36px 32px; border-left: 2px solid rgba(126,237,196,0.4);
+  background: rgba(126,237,196,0.04); border-radius: 4px 20px 20px 4px;
+  position: relative; z-index: 1;
+}
+.quote-label {
+  font-family: "Courier New", monospace; font-size: 10px;
+  letter-spacing: 0.2em; text-transform: uppercase; color: var(--teal); margin-bottom: 16px;
+}
+.framing-quote h3 { font-size: 22px; line-height: 1.3; margin-bottom: 16px; }
+.framing-quote p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+/* ══ BUDGET ══ */
+.budget-head { text-align: center; max-width: 560px; margin: 0 auto 80px; }
+.budget-head h2 { margin: 20px 0 24px; }
+.budget-layout { display: grid; grid-template-columns: 1fr 1.4fr; gap: 24px; align-items: start; }
+.budget-total-card { padding: 52px 44px; text-align: center; position: sticky; top: 40px; }
+.budget-ring-wrap { position: relative; width: min(100%, 240px); margin: 0 auto 40px; }
+.budget-ring-svg { width: 100%; }
+.budget-total-num { font-size: clamp(48px, 5vw, 72px); line-height: 1; letter-spacing: -0.06em; display: block; margin-bottom: 8px; color: var(--text); }
+.budget-total-label { font-family: "Courier New", monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+.budget-per { font-size: 15px; color: var(--soft); margin-bottom: 4px; }
+.budget-per span { color: var(--teal); font-weight: 600; }
+.budget-lines { padding: 44px 40px; display: flex; flex-direction: column; gap: 20px; }
+.budget-line {}
+.budget-line-top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; margin-bottom: 10px; }
+.budget-line-name { font-size: 15px; color: var(--text); }
+.budget-line-amt { font-family: "Courier New", monospace; font-size: 13px; color: var(--soft); white-space: nowrap; flex-shrink: 0; }
+.budget-track { width: 100%; height: 4px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
+.budget-fill { height: 100%; border-radius: inherit; transform: scaleX(0); transform-origin: left; transition: transform 1.2s cubic-bezier(0.22,1,0.36,1); }
+.budget-fill.teal { background: linear-gradient(90deg, var(--teal), var(--cyan)); box-shadow: 0 0 12px var(--teal-glow); }
+.budget-fill.dim  { background: linear-gradient(90deg, rgba(126,237,196,0.5), rgba(109,213,255,0.4)); }
+.budget-fill.muted{ background: rgba(255,255,255,0.15); }
+.budget-fill.animated { transform: scaleX(1); }
+
+/* ══ FOOTER ══ */
+footer {
+  padding: 80px 0; text-align: center; border-top: 1px solid var(--border-soft);
+  position: relative; z-index: 1;
+}
+.footer-logo { font-family: "Courier New", monospace; font-size: 12px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+.footer-note { font-size: 14px; color: rgba(138,150,144,0.6); }
+
+/* ══ RESPONSIVE ══ */
+@media (max-width: 900px) {
+  section { padding: 80px 0; }
+  .hero { min-height: 100svh; padding-bottom: 60px; }
+  .hero-stat-row { grid-template-columns: 1fr; }
+  .hero-stat { border-radius: 0 !important; }
+  .hero-stat:first-child { border-radius: 18px 18px 0 0 !important; }
+  .hero-stat:last-child  { border-radius: 0 0 18px 18px !important; }
+  .journey-head { grid-template-columns: 1fr; gap: 24px; margin-bottom: 56px; }
+  .journey-steps { grid-template-columns: 1fr 1fr; gap: 20px; }
+  .journey-steps::before { display: none; }
+  .why-grid { grid-template-columns: 1fr; gap: 16px; }
+  .ucla-grid { grid-template-columns: 1fr; }
+  .solution-layout { grid-template-columns: 1fr; }
+  .evidence-head { grid-template-columns: 1fr; gap: 24px; }
+  .evidence-grid { grid-template-columns: 1fr; }
+  .disability-row { grid-template-columns: 1fr; }
+  .team-grid { grid-template-columns: 1fr 1fr; }
+  .impl-points { grid-template-columns: 1fr; }
+  .eng-points { grid-template-columns: 1fr; }
+  .framing-card { grid-template-columns: 1fr; gap: 40px; padding: 44px 32px; }
+  .budget-layout { grid-template-columns: 1fr; }
+  .budget-total-card { position: static; }
+}
+@media (max-width: 600px) {
+  section { padding: 64px 0; }
+  .wrap { width: min(100% - 32px, 1160px); }
+  .impl-card { padding: 36px 28px; }
+  .eng-card { padding: 36px 28px; }
+  .eng-top { flex-direction: column; gap: 16px; }
+  .eng-price-block { text-align: left; }
+  .framing-card { padding: 36px 24px; }
+  .budget-lines { padding: 32px 28px; }
+  .budget-total-card { padding: 36px 28px; }
+  .why-card { min-height: unset; padding: 36px 28px; }
+  .why-large-num { font-size: 100px; }
+  .quote-card { padding: 44px 36px; }
+  .team-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="ambient-layer" aria-hidden="true">
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+  <div class="ambient-orb"></div>
+</div>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow reveal">
+      <span class="eyebrow">Mission Daybreak · Reality Management Technologies</span>
+    </div>
+
+    <h1 class="hero-title reveal reveal-delay-1">
+      A Data-Driven<br>
+      Path to <em>Ending</em><br>
+      Veteran Suicide.
+    </h1>
+
+    <p class="body-lg reveal reveal-delay-2" style="max-width:58ch; color: var(--soft);">
+      Reality Management Technologies treats the root causes of PTSD using proprietary frequency therapy — proven, drug-free, and ready to scale across VSO offices and Veteran Centers nationwide.
+    </p>
+
+    <div class="hero-meta reveal reveal-delay-3">
+      <span class="hero-tag">Digital Therapeutics</span>
+      <span class="hero-tag">Frequency Therapy</span>
+      <span class="hero-tag">Veteran PTSD</span>
+      <span class="hero-tag">UCLA-Validated Outcomes</span>
+      <span class="hero-tag">Southern California</span>
+    </div>
+
+    <div class="hero-stat-row reveal reveal-delay-4">
+      <div class="hero-stat">
+        <div class="stat-label">Clinical Study Participants</div>
+        <div class="stat-num" style="color: var(--teal);">152</div>
+        <div class="stat-note">Matched sample, pre &amp; post-session — UCLA Health</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-label">Veteran Lives Touched</div>
+        <div class="stat-num">0</div>
+        <div class="stat-note">Lost to suicide since inception — zero</div>
+      </div>
+      <div class="hero-stat">
+        <div class="stat-label">Years of Research</div>
+        <div class="stat-num">30+</div>
+        <div class="stat-note">Behind the technology and science of Sensory Resonance</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ THE DIAGNOSIS ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="journey-head">
+      <div>
+        <span class="eyebrow reveal">The Problem</span>
+        <h2 class="reveal reveal-delay-1" style="margin-top: 20px;">A crisis that demands<br>a new approach.</h2>
+      </div>
+      <div>
+        <p class="body-lg reveal reveal-delay-2">
+          Veterans experiencing trauma face a nervous system that has become unregulated — producing lack of sleep, anxiety, hypervigilance, and depression. Prolonged exposure leads directly to suicide. Existing options are too slow, too stigmatized, or too drug-dependent to close the gap.
+        </p>
+      </div>
+    </div>
+
+    <div class="journey-steps">
+      <div class="journey-step reveal">
+        <div class="step-num">01</div>
+        <div class="step-title">Stigma</div>
+        <p class="step-desc">Traditional talk therapy is stigmatized among veterans. Many will not engage with clinical settings or pharmaceutical pathways.</p>
+      </div>
+      <div class="journey-step reveal reveal-delay-1">
+        <div class="step-num">02</div>
+        <div class="step-title">Delay</div>
+        <p class="step-desc">Veterans wait months for VA appointments. Crisis compounds. The window to intervene closes before treatment begins.</p>
+      </div>
+      <div class="journey-step reveal reveal-delay-2">
+        <div class="step-num">03</div>
+        <div class="step-title">Dependency</div>
+        <p class="step-desc">Pharmaceutical and opioid prescriptions create new crises. Veterans lose battle brothers to overdose, not just combat.</p>
+      </div>
+      <div class="journey-step reveal reveal-delay-3">
+        <div class="step-num">04</div>
+        <div class="step-title">Isolation</div>
+        <p class="step-desc">Disconnection from community accelerates risk. Without belonging, healing cannot begin — regardless of the modality.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ THE SOLUTION ══════════════ -->
+<section>
+  <div class="wrap">
+    <span class="eyebrow reveal">The Solution</span>
+    <h2 class="reveal reveal-delay-1" style="margin: 20px 0 56px; max-width: 16ch;">Sensory Resonance — the world's first operating system for your senses.</h2>
+
+    <div class="solution-layout">
+      <div class="glass solution-main reveal">
+        <span class="why-icon" style="color: var(--teal); border: 1px solid rgba(126,237,196,0.25); background: var(--teal-dim); font-family: 'Courier New', monospace; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; padding: 8px 14px; border-radius: 999px; display: inline-block; margin-bottom: 24px;">Technology · Reality Center</span>
+        <h3 style="margin-bottom: 20px;">The body heals when every sense is synchronized.</h3>
+        <p class="body-sm" style="margin-bottom: 28px;">Reality Center synchronizes pulsing light, immersive sound, and full-body vibration to induce deep states of relaxation while simultaneously resetting the nervous system. The result is Sensory Resonance — a harmonic state that activates the same neural pathways as deep meditation and psychedelic therapy, without any drugs or side effects.</p>
+        <p class="body-sm" style="margin-bottom: 32px;">FDA breakthrough research has validated that brainwave frequency entrainment through pulsing light and sound improves function in brain areas affected by PTSD and neurological conditions. Our proprietary platform makes this accessible, low-cost, and scalable — no expensive labs, no clinical operators required.</p>
+
+        <div class="modality-row">
+          <div class="modality-item">
+            <div class="modality-icon">◎</div>
+            <div class="modality-text">
+              <h4>Pulsing Light Therapy</h4>
+              <p>Gamma entrainment stimulates gray matter and reverses neurological deficits linked to PTSD and cognitive decline. FDA-granted breakthrough status.</p>
+            </div>
+          </div>
+          <div class="modality-item">
+            <div class="modality-icon">♫</div>
+            <div class="modality-text">
+              <h4>Synchronized Sound</h4>
+              <p>Binaural frequencies and bioacoustic resonance engage the limbic system, restoring function to trauma-impaired emotional processing centers.</p>
+            </div>
+          </div>
+          <div class="modality-item">
+            <div class="modality-icon">∿</div>
+            <div class="modality-text">
+              <h4>Full-Body Vibration</h4>
+              <p>Vibroacoustic stimulation activates the body's natural healing mechanisms, reducing cortisol and restoring the parasympathetic nervous system.</p>
+            </div>
+          </div>
+          <div class="modality-item">
+            <div class="modality-icon">◈</div>
+            <div class="modality-text">
+              <h4>InTune Vocal Biomarkers</h4>
+              <p>weareintune.io tracks vocal frequency signatures as a biometric — providing measurable, session-by-session proof of neurological improvement.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="solution-aside reveal reveal-delay-1">
+        <div class="glass-sm solution-pill">
+          <div class="pill-icon">🎖</div>
+          <h4>Veteran-First Design</h4>
+          <p>Modeled after EMDR — already VA-approved — but delivered in a way veterans actually embrace. No stigma. No talk. Just experience.</p>
+        </div>
+        <div class="glass-sm solution-pill">
+          <div class="pill-icon">📐</div>
+          <h4>Scalable by Design</h4>
+          <p>RMT designs, manufactures, and trains all operators in-house. A small, quiet section of any VSO or Veteran Center is all that's needed to deploy.</p>
+        </div>
+        <div class="glass-sm solution-pill">
+          <div class="pill-icon">📊</div>
+          <h4>Data-Driven Outcomes</h4>
+          <p>InTune's vocal biomarker platform creates new vibrational datasets — a unique biometric signal that predicts health outcomes and tracks efficacy over time.</p>
+        </div>
+        <div class="glass-sm solution-pill">
+          <div class="pill-icon">💊</div>
+          <h4>Drug-Free &amp; Safe</h4>
+          <p>No pharmaceuticals. No side effects. No dependency risk. A drug-free alternative that actually works — verified by UCLA Population Behavioral Health.</p>
+        </div>
+        <div class="glass-sm solution-pill" style="border-left: 3px solid rgba(126,237,196,0.4); background: rgba(126,237,196,0.04);">
+          <div class="quote-label" style="font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--teal); margin-bottom: 8px;">Albert Einstein</div>
+          <p style="font-size: 15px; color: var(--soft); font-style: italic; line-height: 1.65;">"Future medicines will be the medicines of frequencies."</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ UCLA CLINICAL DATA ══════════════ -->
+<section class="ucla-section">
+  <div class="wrap">
+    <div class="ucla-head">
+      <span class="eyebrow reveal">Clinical Evidence</span>
+      <h2 class="reveal reveal-delay-1">UCLA-validated outcomes.<br>Statistically significant.</h2>
+      <p class="body-lg reveal reveal-delay-2">In partnership with UCLA Health's Division of Population Behavioral Health, Reality Center conducted a rigorous pre/post evaluation across 152 matched participants — proving measurable, significant improvement in a single session.</p>
+    </div>
+
+    <!-- Key Stats -->
+    <div class="ucla-grid">
+      <div class="glass-sm ucla-card reveal">
+        <div class="ucla-kicker">Study Sample</div>
+        <div class="ucla-big">152</div>
+        <p>Matched participants who completed both pre- and post-session surveys. 75% reported living with a mental, physical, or other disability.</p>
+        <span class="sig-badge">p &lt; 0.001 — Highly Significant</span>
+      </div>
+      <div class="glass-sm ucla-card reveal reveal-delay-1">
+        <div class="ucla-kicker">BUPPS-SV · Mental Health Protective Factors</div>
+        <div class="ucla-big">+14<span>%</span></div>
+        <p>Mean score rose from 21.36 to 24.36 in a single session. Participants reported feeling more hopeful, connected, and capable of managing their wellbeing.</p>
+        <div class="score-compare">
+          <div class="score-row">
+            <div class="score-label"><span>Pre-session</span><strong>21.36 / 30</strong></div>
+            <div class="bar-track"><div class="bar-fill pre" style="width: 71.2%"></div></div>
+          </div>
+          <div class="score-row">
+            <div class="score-label"><span>Post-session</span><strong>24.36 / 30</strong></div>
+            <div class="bar-track"><div class="bar-fill post" style="width: 81.2%"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="glass-sm ucla-card reveal reveal-delay-2">
+        <div class="ucla-kicker">WHO-5 · Mental Wellbeing Index</div>
+        <div class="ucla-big">+23<span>%</span></div>
+        <p>Mean wellbeing score rose from 15.30 to 18.86 — a 23% increase in overall mental wellbeing after one session. All five survey items improved significantly.</p>
+        <div class="score-compare">
+          <div class="score-row">
+            <div class="score-label"><span>Pre-session</span><strong>15.30 / 25</strong></div>
+            <div class="bar-track"><div class="bar-fill pre" style="width: 61.2%"></div></div>
+          </div>
+          <div class="score-row">
+            <div class="score-label"><span>Post-session</span><strong>18.86 / 25</strong></div>
+            <div class="bar-track"><div class="bar-fill post" style="width: 75.4%"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quote -->
+    <div class="glass quote-card reveal">
+      <blockquote>"I started my healing journey in March of 2020 and was introduced to the Reality Center by a fellow combat veteran. During my second treatment, I had an incredible breakthrough — I saw my best friend who was killed by a suicide bomber in Syria. He sent me a message in red, white, and blue: 'I LOVE YOU BRO.' He used to always say that to me. I started sobbing. It is through this life-changing treatment that I was able to truly start healing. It would be ideal if all veterans were able to experience the same."</blockquote>
+      <cite>— Johnny S. · Navy SEAL · PTSD &amp; TBI Survivor</cite>
+    </div>
+
+    <!-- BUPPS-SV Item-Level -->
+    <div style="margin-top: 48px;">
+      <span class="eyebrow reveal" style="margin-bottom: 32px; display: inline-flex;">Item-Level Analysis · All Items Significant at p &lt; 0.001</span>
+      <div class="disability-row" style="margin-top: 24px;">
+        <div class="glass-sm dis-card reveal">
+          <div class="dis-pct teal">+11.5%</div>
+          <div class="dis-label"><strong style="color: var(--soft);">Sense of Belonging</strong><br>Pre: 3.32 → Post: 3.95 · Participants felt more connected and less isolated after a single session.</div>
+        </div>
+        <div class="glass-sm dis-card reveal reveal-delay-1">
+          <div class="dis-pct cyan">+17.7%</div>
+          <div class="dis-label"><strong style="color: var(--soft);">Calmness &amp; Relaxation</strong><br>Pre: 2.94 → Post: 3.83 · The largest single-item wellbeing gain — the session physically regulates the nervous system.</div>
+        </div>
+        <div class="glass-sm dis-card reveal reveal-delay-2">
+          <div class="dis-pct amber">+11.5%</div>
+          <div class="dis-label"><strong style="color: var(--soft);">Hope About the Future</strong><br>Pre: 3.74 → Post: 4.17 · Hopelessness is a primary suicide predictor. One session measurably shifts it.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Demographics context -->
+    <div class="disability-row" style="margin-top: 16px;">
+      <div class="glass-sm dis-card reveal">
+        <div class="dis-pct teal">75%</div>
+        <div class="dis-label">of participants reported a mental, physical, or other disability — confirming the program reaches those who need it most.</div>
+      </div>
+      <div class="glass-sm dis-card reveal reveal-delay-1">
+        <div class="dis-pct cyan">69%</div>
+        <div class="dis-label">reported a mental disability specifically — the core population experiencing PTSD, depression, and suicidal ideation.</div>
+      </div>
+      <div class="glass-sm dis-card reveal reveal-delay-2">
+        <div class="dis-pct amber">86%</div>
+        <div class="dis-label">of participants were between ages 26–59 — active-age veterans and first responders in their highest-risk window.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ EVIDENCE FRAMEWORK ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="evidence-head">
+      <div>
+        <span class="eyebrow reveal">Evidence Framework</span>
+        <h2 class="reveal reveal-delay-1" style="margin-top: 20px;">30 years of science.<br>One integrated platform.</h2>
+      </div>
+      <div>
+        <p class="body-lg reveal reveal-delay-2">Our approach uniquely combines the most effective, evidence-based therapies into a single experience — guided meditation, sensory synchronization, and brainwave entrainment, supported by a growing body of peer-reviewed neuroscience.</p>
+      </div>
+    </div>
+
+    <div class="evidence-grid">
+      <div class="glass-sm evidence-card reveal">
+        <div class="evi-icon">🧠</div>
+        <h4>Gamma Entrainment</h4>
+        <p>FDA breakthrough-designated research shows that 40Hz gamma stimulation via light and sound improves gray matter function and reverses PTSD-related neurological deficits. (Adaikkan, 2019 — PubMed)</p>
+      </div>
+      <div class="glass-sm evidence-card reveal reveal-delay-1">
+        <div class="evi-icon">👁</div>
+        <h4>EMDR Mirror Technology</h4>
+        <p>Our platform mirrors Eye Movement Desensitization and Reprocessing — already VA-approved — but through synchronized sensory delivery, removing the need for clinical operators and lengthy sessions.</p>
+      </div>
+      <div class="glass-sm evidence-card reveal reveal-delay-2">
+        <div class="evi-icon">🔊</div>
+        <h4>Sensory Synchronization</h4>
+        <p>Research confirms that when eyes move, eardrums follow — demonstrating the nervous system's natural disposition toward multi-sensory synchronization. (Gruters, 2017 — PNAS)</p>
+      </div>
+      <div class="glass-sm evidence-card reveal">
+        <div class="evi-icon">🧘</div>
+        <h4>Meditation + Limbic Restoration</h4>
+        <p>Meditation restores function to the limbic system's trauma-impaired emotional processing centers. Combined with sensory resonance, results are compounding and lasting. (VA Research, 2021)</p>
+      </div>
+      <div class="glass-sm evidence-card reveal reveal-delay-1">
+        <div class="evi-icon">🎙</div>
+        <h4>Vocal Biomarker Intelligence</h4>
+        <p>InTune (weareintune.io) captures a person's unique frequency signature — a powerful biometric that predicts health outcomes and provides measurable, session-by-session data on efficacy. (Nicholson — PubMed)</p>
+      </div>
+      <div class="glass-sm evidence-card reveal reveal-delay-2">
+        <div class="evi-icon">🤝</div>
+        <h4>Community as the First Pillar</h4>
+        <p>Clinical outcomes from the Reality Center confirm that belonging is foundational to healing. Our peer-support model and veteran ambassador network ensure the treatment environment itself heals.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ IMPLEMENTATION ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="impl-head">
+      <span class="eyebrow reveal">Implementation Plan</span>
+      <h2 class="reveal reveal-delay-1">Scalable from day one.</h2>
+      <p class="body-lg reveal reveal-delay-2">We've designed for minimum footprint and maximum impact — deploying into VSO offices and Veteran Centers that are already VA-funded, already trusted, already accessible.</p>
+    </div>
+
+    <div class="impl-stack">
+
+      <article class="glass impl-card reveal">
+        <div class="impl-top-row">
+          <div>
+            <div class="impl-phase-label">Phase 1 · Active Now</div>
+            <h3>Los Angeles / Santa Monica</h3>
+          </div>
+          <div class="impl-num">01</div>
+        </div>
+        <div class="impl-body">
+          <p class="body-sm">Operating at capacity in Santa Monica. Hundreds of veterans, EMS officers, and first responders treated. Zero client losses to suicide since inception. Peer referral network growing organically week over week.</p>
+          <ul class="impl-points">
+            <li>Reality Center flagship facility operational</li>
+            <li>UCLA clinical evaluation completed and validated</li>
+            <li>Veteran peer network generating consistent inbound referrals</li>
+            <li>All hardware, software, and operator training developed in-house</li>
+            <li>Free and low-cost veteran treatment pathway active</li>
+            <li>Board members across multiple VSO networks</li>
+          </ul>
+          <div class="impl-outcome">
+            <div class="impl-outcome-label">Current Impact</div>
+            <div class="impl-outcome-text">Hundreds of veterans treated. Zero suicide losses. UCLA data proving statistically significant improvement in mental health protective factors and wellbeing after a single session.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="glass impl-card reveal">
+        <div class="impl-top-row">
+          <div>
+            <div class="impl-phase-label">Phase 2 · Mission Daybreak Expansion</div>
+            <h3>Bay Area + San Diego — Existing VSO Partnerships</h3>
+          </div>
+          <div class="impl-num">02</div>
+        </div>
+        <div class="impl-body">
+          <p class="body-sm">Existing relationships with Veteran Service Officers in San Francisco Bay and Greater San Diego have already secured space and identified operators — including a former VA employee and Licensed Clinical Social Worker. Expansion is ready to execute immediately upon funding.</p>
+          <ul class="impl-points">
+            <li>VSO offices secured in Bay Area and San Diego</li>
+            <li>LCSW operator identified and available</li>
+            <li>RMT provides equipment setup and operator training</li>
+            <li>Deployable into any small, quiet section of a VSO office</li>
+            <li>Minimal startup costs — no new real estate needed</li>
+            <li>Extreme fiscal discipline — funds directed to treatment, not overhead</li>
+          </ul>
+          <div class="impl-outcome">
+            <div class="impl-outcome-label">Mission Daybreak Goal</div>
+            <div class="impl-outcome-text">Expand to Bay Area and San Diego while continuing Los Angeles operations — building the scalability case for national rollout across VA-funded VSO locations.</div>
+          </div>
+        </div>
+      </article>
+
+      <article class="glass impl-card reveal">
+        <div class="impl-top-row">
+          <div>
+            <div class="impl-phase-label">Phase 3 · National Deployment</div>
+            <h3>Tri-West Healthcare Alliance Integration</h3>
+          </div>
+          <div class="impl-num">03</div>
+        </div>
+        <div class="impl-body">
+          <p class="body-sm">Once accepted as a VA-provider pathway, Reality Center qualifies for Tri-West Healthcare Alliance coverage — opening access to federal funding and enabling nationwide deployment through existing VSO and Veteran Center infrastructure. No new buildings. No new bureaucracy.</p>
+          <ul class="impl-points">
+            <li>Apply as Tri-West Healthcare Alliance provider</li>
+            <li>Access federal funding streams for veteran mental health</li>
+            <li>Tie into existing VA and VSO real estate nationally</li>
+            <li>Document efficacy data across sites for continuous improvement</li>
+            <li>InTune biomarker platform aggregates national outcomes intelligence</li>
+            <li>Train local veteran advocates as operators — building community employment</li>
+          </ul>
+          <div class="impl-outcome">
+            <div class="impl-outcome-label">Long-Term Vision</div>
+            <div class="impl-outcome-text">A nationwide network of frequency therapy access points embedded inside VA-trusted infrastructure — healing veterans at scale, at low cost, with zero pharmaceuticals.</div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ WHY THIS WORKS ══════════════ -->
+<section>
+  <div class="wrap">
+    <span class="eyebrow reveal">Why This Works</span>
+    <h2 class="reveal reveal-delay-1" style="margin: 20px 0 56px; max-width: 18ch;">Two products. One flywheel. Compounding impact.</h2>
+
+    <div class="why-grid">
+      <div class="glass why-card teal reveal">
+        <div class="why-large-num">RC</div>
+        <div class="why-body">
+          <span class="why-icon">Physical · Reality Center</span>
+          <h3>The in-person breakthrough that starts the healing.</h3>
+          <p class="body-sm" style="margin-top: 12px;">A multi-sensory frequency therapy session at realitymgmt.com. Light, sound, and vibration work together to regulate the nervous system, restore limbic function, and create a profound, repeatable healing experience.</p>
+          <ul class="why-points">
+            <li>8 seats per hour — built to scale</li>
+            <li>Vanity Fair &amp; LA Times featured — elite credibility</li>
+            <li>Zero negative reviews across all platforms</li>
+            <li>Veteran Operation Reset program — free access pathway</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="glass why-card amber reveal reveal-delay-1">
+        <div class="why-large-num">IT</div>
+        <div class="why-body">
+          <span class="why-icon">Digital · InTune App</span>
+          <h3>The daily habit that maintains the healing.</h3>
+          <p class="body-sm" style="margin-top: 12px;">A vocal biomarker analysis platform at weareintune.io. Veterans use InTune daily to track their own frequency signature — creating a measurable, documented record of improvement that builds compliance, community, and clinical evidence simultaneously.</p>
+          <ul class="why-points">
+            <li>Vocal biomarker = unique, non-invasive biometric</li>
+            <li>Machine learning generates personalized treatment data</li>
+            <li>Creates daily touchpoint between sessions</li>
+            <li>Aggregates population-level PTSD outcomes intelligence</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ TEAM ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="team-head">
+      <span class="eyebrow reveal">The Team</span>
+      <h2 class="reveal reveal-delay-1">Built by veterans,<br>scientists, and advocates.</h2>
+      <p class="body-lg reveal reveal-delay-2">Every founder has a personal stake in this mission. They have felt the loss, done the research, and built the technology — because their community demanded it.</p>
+    </div>
+
+    <div class="team-grid">
+      <div class="glass-sm team-card reveal">
+        <div class="team-initial">JC</div>
+        <div class="team-role">Co-Founder · Combat Veteran</div>
+        <h4>Jonathan Chia</h4>
+        <p>Service-disabled Army combat veteran who lost 16 battle brothers in Iraq, and nearly 100 to drug overdose and suicide after returning home. Turned trauma into a life mission — building the healing system he needed and couldn't find.</p>
+      </div>
+      <div class="glass-sm team-card reveal reveal-delay-1">
+        <div class="team-initial">DE</div>
+        <div class="team-role">Co-Founder · Neuroscientist</div>
+        <h4>Don Estes</h4>
+        <p>Certified medical technologist, laboratory director, and one of the world's leading authorities in frequency analytics and vibrational medicine. 30+ years pioneering sensory science and the therapeutic applications of sound and light.</p>
+      </div>
+      <div class="glass-sm team-card reveal reveal-delay-2">
+        <div class="team-initial">TR</div>
+        <div class="team-role">Co-Founder · Sensory Technology</div>
+        <h4>Tarun Raj, M.A.</h4>
+        <p>Sensory technology expert, audio-visual artist, and patented inventor with over a decade championing wellness technology. Serves as lead client facilitator and has designed the proprietary frequency protocols at Reality Center's core.</p>
+      </div>
+      <div class="glass-sm team-card reveal">
+        <div class="team-initial">BT</div>
+        <div class="team-role">Co-Founder · Policy &amp; Advocacy</div>
+        <h4>Benji Tucker</h4>
+        <p>International trade specialist with decades of experience in Native American policy and VSO networks. His advocacy relationships have established the community partnerships enabling VSO-based expansion.</p>
+      </div>
+      <div class="glass-sm team-card reveal reveal-delay-1">
+        <div class="team-initial">AS</div>
+        <div class="team-role">Advisor · Retired Infantry Colonel</div>
+        <h4>Arnold V. Strong, M.S.</h4>
+        <p>Service-disabled Army combat veteran and retired infantry officer specializing in operations and communications strategy. Serves on four corporate and nonprofit boards, driving strategic performance across the RMT ecosystem.</p>
+      </div>
+      <div class="glass-sm team-card reveal reveal-delay-2">
+        <div class="team-initial">AA</div>
+        <div class="team-role">Partner · Veteran Advocacy</div>
+        <h4>Aaron Augustis</h4>
+        <p>Service-disabled Army combat veteran and founder of Veterans Holistic Group — a nonprofit dedicated to ending the veteran opioid epidemic. His own Reality Center treatment experience led to his full partnership in the mission.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ ENGAGEMENT MODELS ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="eng-head">
+      <span class="eyebrow reveal">Engagement Models</span>
+      <h2 class="reveal reveal-delay-1">Three ways to partner.<br>One shared mission.</h2>
+      <p class="body-lg reveal reveal-delay-2">We've designed specific engagement pathways based on organizational readiness, desired depth of impact, and available resources.</p>
+    </div>
+
+    <div class="eng-stack">
+
+      <article class="glass eng-card featured reveal">
+        <div class="eng-top">
+          <div>
+            <div class="eng-option">Option 1 · The Build</div>
+            <h3>Auto-Closer Infrastructure</h3>
+            <span class="eng-recommended">★ Recommended First Step</span>
+          </div>
+          <div class="eng-price-block">
+            <span class="eng-price">$10K</span>
+            <div class="eng-price-note">One-time build</div>
+          </div>
+        </div>
+        <div class="eng-body">
+          <p>Fix the conversion leak and get founders off the phone. You have the technology. You have the traffic. You lack the machine to process inquiries at scale. This 6-week sprint builds the "Virtual Jonathan" system — an automated education and booking engine that closes while you sleep.</p>
+          <ul class="eng-points">
+            <li>AI Voice &amp; SMS Agent — trained on your knowledge base, books 24/7</li>
+            <li>Science of Reality VSL Page — pre-educates leads before they call</li>
+            <li>Segmentation engine — auto-routes Veterans vs. General Public</li>
+            <li>Turnkey automation — fully built and handed to your team</li>
+          </ul>
+          <div class="eng-timeline">
+            <div class="eng-tl-item">
+              <div class="eng-tl-label">Timeline</div>
+              <div class="eng-tl-val">6 Weeks</div>
+            </div>
+            <div class="eng-tl-item">
+              <div class="eng-tl-label">Type</div>
+              <div class="eng-tl-val">One-time Build</div>
+            </div>
+            <div class="eng-tl-item">
+              <div class="eng-tl-label">Week 1 Goal</div>
+              <div class="eng-tl-val">Audit &amp; Blueprint</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="glass eng-card reveal">
+        <div class="eng-top">
+          <div>
+            <div class="eng-option">Option 2 · The Guardian</div>
+            <h3>Fractional Integrator</h3>
+          </div>
+          <div class="eng-price-block">
+            <span class="eng-price">$6K</span>
+            <div class="eng-price-note">Per month · Cancel anytime</div>
+          </div>
+        </div>
+        <div class="eng-body">
+          <p>Overseeing the transition, launching Website 3.0, and managing vendor accountability. We become your Head of Growth — sitting above your vendors, ensuring the ecosystem works as one, and protecting the mission from operational drag.</p>
+          <ul class="eng-points">
+            <li>Vendor audit — review Local IQ performance and hold accountable</li>
+            <li>Tech stack ownership — CRM, website launch, and automations</li>
+            <li>Content strategy — guide team on what to create to feed the funnel</li>
+            <li>Monthly engagement — cancel with 30 days notice</li>
+          </ul>
+          <div class="eng-timeline">
+            <div class="eng-tl-item">
+              <div class="eng-tl-label">Timeline</div>
+              <div class="eng-tl-val">Monthly</div>
+            </div>
+            <div class="eng-tl-item">
+              <div class="eng-tl-label">Cancellation</div>
+              <div class="eng-tl-val">30 Days Notice</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="glass eng-card reveal">
+        <div class="eng-top">
+          <div>
+            <div class="eng-option">Option 3 · The Anti-Agency</div>
+            <h3>Full Growth Takeover</h3>
+          </div>
+          <div class="eng-price-block">
+            <span class="eng-price">$12K</span>
+            <div class="eng-price-note">Per month · Includes ad spend mgmt</div>
+          </div>
+        </div>
+        <div class="eng-body">
+          <p>For organizations ready to consolidate Strategy + Execution. Replace the current agency and run one aligned growth engine — where ad spend is directly connected to backend conversion data, lowering your cost per booked appointment.</p>
+          <ul class="eng-points">
+            <li>Full Meta/Google ad management — replace Local IQ</li>
+            <li>Full automation management — AI agents, email/SMS nurture</li>
+            <li>One ecosystem — ad spend aligned with conversion data</li>
+            <li>Lower cost per booked appointment over time</li>
+          </ul>
+          <div class="eng-timeline">
+            <div class="eng-tl-item">
+              <div class="eng-tl-label">Timeline</div>
+              <div class="eng-tl-val">Monthly</div>
+            </div>
+            <div class="eng-tl-item">
+              <div class="eng-tl-label">Includes</div>
+              <div class="eng-tl-val">Ad Mgmt + Tech + Strategy</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ STRATEGIC FRAMING ══════════════ -->
+<section>
+  <div class="wrap">
+    <div class="glass framing-card reveal">
+      <div class="framing-body">
+        <span class="eyebrow" style="margin-bottom: 20px; display: inline-flex;">Strategic Context</span>
+        <h2>Automation is not lazy.<br>It is Mission Expansion.</h2>
+        <p class="body-sm" style="margin-top: 16px; line-height: 1.8;">Every minute a founder spends answering basic questions on the phone is a minute not spent expanding the mission to new communities — Police, Fire, At-Risk Youth, Native American populations, and veterans in every state. The infrastructure we build together is the bridge between a proven, category-defining technology and the millions of people it can still reach.</p>
+        <div class="chips">
+          <span class="chip">Veterans</span>
+          <span class="chip">First Responders</span>
+          <span class="chip">At-Risk Youth</span>
+          <span class="chip">Police &amp; Fire</span>
+          <span class="chip">Native American Communities</span>
+          <span class="chip">Workplace Wellness</span>
+          <span class="chip">Clinical Partnerships</span>
+          <span class="chip">Performance Optimization</span>
+        </div>
+      </div>
+      <div class="framing-quote">
+        <div class="quote-label">Program Logic</div>
+        <h3>The technology is proven.<br>The mission demands scale.</h3>
+        <p>Reality Center has already demonstrated what happens when the right technology reaches the right person at the right time. Mission Daybreak is the infrastructure to make that available to every veteran who needs it — not just those who find us by word of mouth.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ BUDGET ══════════════ -->
+<section class="budget-section">
+  <div class="wrap">
+    <div class="budget-head">
+      <span class="eyebrow reveal">Resource Allocation</span>
+      <h2 class="reveal reveal-delay-1">Minimal overhead.<br>Maximum mission.</h2>
+      <p class="body-lg reveal reveal-delay-2">Extreme fiscal discipline — every dollar directed to treatment delivery, not unnecessary rent or administration.</p>
+    </div>
+
+    <div class="budget-layout">
+
+      <div class="glass budget-total-card reveal">
+        <div class="budget-ring-wrap">
+          <svg class="budget-ring-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="gr1" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#7EEDC4"/>
+                <stop offset="100%" stop-color="#6DD5FF"/>
+              </linearGradient>
+            </defs>
+            <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="20"/>
+            <!-- Equipment: 30% -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="url(#gr1)" stroke-width="20"
+              stroke-dasharray="150.8 352.2" stroke-dashoffset="100.5" stroke-linecap="round"/>
+            <!-- Operator Training: 25% -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="#F0C060" stroke-width="20" stroke-opacity="0.8"
+              stroke-dasharray="125.7 377.3" stroke-dashoffset="-50.3" stroke-linecap="round"/>
+            <!-- Treatment Operations: 25% -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="#6DD5FF" stroke-width="20" stroke-opacity="0.5"
+              stroke-dasharray="125.7 377.3" stroke-dashoffset="-176" stroke-linecap="round"/>
+            <!-- Data / Reporting: 12% -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(126,237,196,0.5)" stroke-width="20"
+              stroke-dasharray="60.3 442.7" stroke-dashoffset="-301.7" stroke-linecap="round"/>
+            <!-- Admin: 8% -->
+            <circle cx="100" cy="100" r="80" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="20"
+              stroke-dasharray="40.2 462.8" stroke-dashoffset="-362" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="budget-total-num">Mission<br>Ready</span>
+        <div class="budget-total-label">Operational from Day 1</div>
+        <p class="budget-per">No additional resources needed to <span>begin</span></p>
+        <p class="body-sm" style="margin-top: 12px; font-size: 13px;">RMT already provides treatment in Los Angeles. Initial funds accelerate reach — not startup costs.</p>
+      </div>
+
+      <div class="glass budget-lines reveal reveal-delay-1">
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Proprietary equipment deployment</span>
+            <span class="budget-line-amt">30%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill teal" style="width:100%" data-pct="0.30"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Operator identification &amp; training</span>
+            <span class="budget-line-amt">25%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill teal" style="width:83.3%" data-pct="0.25"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Veteran treatment operations (sessions)</span>
+            <span class="budget-line-amt">25%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill dim" style="width:83.3%" data-pct="0.25"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">InTune biomarker data &amp; outcomes reporting</span>
+            <span class="budget-line-amt">12%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill dim" style="width:40%" data-pct="0.12"></div></div>
+        </div>
+        <div class="budget-line">
+          <div class="budget-line-top">
+            <span class="budget-line-name">Administration &amp; project management</span>
+            <span class="budget-line-amt">8%</span>
+          </div>
+          <div class="budget-track"><div class="budget-fill muted" style="width:26.7%" data-pct="0.08"></div></div>
+        </div>
+        <div style="margin-top: 12px; padding: 20px; border-radius: 14px; background: var(--teal-dim); border: 1px solid rgba(126,237,196,0.2);">
+          <div style="font-family: 'Courier New', monospace; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--teal); margin-bottom: 8px;">Fiscal Principle</div>
+          <p style="font-size: 14px; color: var(--soft); line-height: 1.65;">Zero unnecessary rent. Zero bloated administration. We operate on extreme fiscal discipline and want every dollar directed to actual veteran treatment — which is why the most cost-effective model ties into existing VSO space that is already funded by the VA.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer>
+  <div class="footer-logo">Reality Management Technologies · realitymgmt.com · weareintune.io</div>
+  <div class="footer-note" style="margin-bottom: 8px;">Mission Daybreak Application · Frequency Therapy / Digital Therapeutics</div>
+  <div class="footer-note">"Future medicines will be the medicines of frequencies." — Albert Einstein</div>
+</footer>
+
+<script>
+(function() {
+  // Reveal on scroll
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(function(el) {
+    observer.observe(el);
+  });
+
+  // Budget bar animation
+  const budgetObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.budget-fill').forEach(function(fill) {
+          fill.classList.add('animated');
+        });
+        budgetObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  const budgetLayout = document.querySelector('.budget-layout');
+  if (budgetLayout) budgetObserver.observe(budgetLayout);
+
+  // Score bar animation
+  const scoreObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.bar-fill').forEach(function(fill) {
+          fill.classList.add('animated');
+        });
+        scoreObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.2 });
+
+  document.querySelectorAll('.ucla-grid').forEach(function(el) {
+    scoreObserver.observe(el);
+  });
+
+  // Init transforms
+  document.querySelectorAll('.budget-fill, .bar-fill').forEach(function(fill) {
+    fill.style.transform = 'scaleX(0)';
+  });
+
+  // Animate stat counter for the "0" veteran losses
+  const statNums = document.querySelectorAll('.stat-num');
+  const counterObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        if (el.dataset.count) {
+          let start = 0;
+          const end = parseInt(el.dataset.count);
+          const duration = 1500;
+          const step = (end / duration) * 16;
+          const timer = setInterval(function() {
+            start += step;
+            if (start >= end) { el.textContent = end; clearInterval(timer); }
+            else el.textContent = Math.floor(start);
+          }, 16);
+        }
+        counterObserver.unobserve(el);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  statNums.forEach(function(el) { counterObserver.observe(el); });
+})();
+</script>
+</body>
+</html>
