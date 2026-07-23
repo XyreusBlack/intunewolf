@@ -1,0 +1,381 @@
+<div id="intune-voice-plugin">
+  <style>
+    #intune-voice-plugin {
+      --ivp-bg: color-mix(in srgb, var(--background, #05050b) 94%, #10101d);
+      --ivp-panel: color-mix(in srgb, var(--card, #11111b) 86%, transparent);
+      --ivp-text: var(--foreground, #f7f5fb);
+      --ivp-muted: var(--muted-foreground, #9492a3);
+      --ivp-border: color-mix(in srgb, var(--border, #343340) 62%, transparent);
+      width: 100%;
+      min-width: 320px;
+      color: var(--ivp-text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    }
+    #intune-voice-plugin * { box-sizing: border-box; }
+    #intune-voice-plugin .ivp-card {
+      position: relative;
+      overflow: hidden;
+      min-height: 690px;
+      padding: 22px;
+      border: 1px solid var(--ivp-border);
+      border-radius: 34px;
+      background:
+        radial-gradient(circle at 50% 37%, rgba(113, 72, 255, .12), transparent 34%),
+        radial-gradient(circle at 32% 68%, rgba(255, 111, 83, .055), transparent 27%),
+        linear-gradient(160deg, rgba(19, 19, 31, .96), rgba(5, 5, 12, .98));
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 22px 80px rgba(0,0,0,.32);
+    }
+    #intune-voice-plugin .ivp-head,
+    #intune-voice-plugin .ivp-metrics,
+    #intune-voice-plugin .ivp-notes {
+      position: relative;
+      z-index: 2;
+    }
+    #intune-voice-plugin .ivp-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    #intune-voice-plugin .ivp-state { display: flex; align-items: center; gap: 10px; color: var(--ivp-muted); }
+    #intune-voice-plugin .ivp-state-dot { width: 8px; height: 8px; border-radius: 50%; background: #8f8b9b; box-shadow: 0 0 0 rgba(255,255,255,0); transition: .3s ease; }
+    #intune-voice-plugin .ivp-state-dot.is-live { background: #77f8d2; box-shadow: 0 0 18px rgba(119,248,210,.9); }
+    #intune-voice-plugin .ivp-live-note { display: flex; align-items: baseline; gap: 9px; }
+    #intune-voice-plugin .ivp-note-name { font-size: clamp(24px, 4vw, 34px); font-weight: 400; letter-spacing: -.03em; }
+    #intune-voice-plugin .ivp-hz { color: var(--ivp-muted); font-variant-numeric: tabular-nums; }
+    #intune-voice-plugin .ivp-stage { position: relative; z-index: 1; display: grid; place-items: center; min-height: 500px; margin: -4px 0 -16px; }
+    #intune-voice-plugin canvas { display: block; width: min(100%, 590px); aspect-ratio: 1; }
+    #intune-voice-plugin .ivp-mic {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      width: 72px;
+      height: 72px;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 50%;
+      color: var(--ivp-text);
+      background: rgba(8,8,16,.68);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.1), 0 0 0 10px rgba(255,255,255,.018), 0 18px 50px rgba(0,0,0,.38);
+      backdrop-filter: blur(18px);
+      cursor: pointer;
+      transition: transform .28s ease, border-color .28s ease, background .28s ease;
+    }
+    #intune-voice-plugin .ivp-mic:hover { transform: scale(1.04); border-color: rgba(255,255,255,.28); }
+    #intune-voice-plugin .ivp-mic.is-live { background: rgba(255,74,106,.15); border-color: rgba(255,136,160,.52); }
+    #intune-voice-plugin .ivp-mic svg { width: 28px; height: 28px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+    #intune-voice-plugin .ivp-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-top: 2px; }
+    #intune-voice-plugin .ivp-metric { min-width: 0; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.07); }
+    #intune-voice-plugin .ivp-kicker { color: var(--ivp-muted); }
+    #intune-voice-plugin .ivp-reading { display: flex; align-items: baseline; gap: 8px; margin-top: 4px; font-size: 19px; font-variant-numeric: tabular-nums; }
+    #intune-voice-plugin .ivp-reading span:last-child { color: var(--ivp-muted); }
+    #intune-voice-plugin .ivp-notes { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 7px; margin-top: 22px; }
+    #intune-voice-plugin .ivp-note { display: grid; justify-items: center; gap: 7px; min-width: 0; color: var(--ivp-muted); }
+    #intune-voice-plugin .ivp-note-light { width: 5px; height: 18px; border-radius: 99px; background: var(--note-color); opacity: calc(.23 + var(--energy, 0) * .77); transform: scaleY(calc(.62 + var(--energy, 0) * .8)); transform-origin: bottom; box-shadow: 0 0 calc(3px + var(--energy, 0) * 16px) var(--note-color); transition: opacity .1s linear, transform .1s linear; }
+    #intune-voice-plugin .ivp-note-label { font-size: 11px; white-space: nowrap; }
+    #intune-voice-plugin .ivp-error { display: none; margin: 14px 0 0; color: #ff9cae; }
+    #intune-voice-plugin .ivp-error.is-visible { display: block; }
+    @media (max-width: 520px) {
+      #intune-voice-plugin .ivp-card { min-height: 600px; padding: 18px; border-radius: 28px; }
+      #intune-voice-plugin .ivp-stage { min-height: 410px; margin-bottom: -6px; }
+      #intune-voice-plugin .ivp-mic { width: 64px; height: 64px; }
+      #intune-voice-plugin .ivp-notes { gap: 3px; }
+      #intune-voice-plugin .ivp-note-label { font-size: 10px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #intune-voice-plugin .ivp-mic, #intune-voice-plugin .ivp-note-light { transition: none; }
+    }
+  </style>
+
+  <section class="ivp-card" aria-label="Live voice tone visualization">
+    <div class="ivp-head">
+      <div class="ivp-state"><span class="ivp-state-dot" id="ivpStateDot"></span><span id="ivpState">Tap to listen</span></div>
+      <div class="ivp-live-note"><span class="ivp-note-name" id="ivpLiveNote">C4</span><span class="ivp-hz" id="ivpHz">261.6 Hz</span></div>
+    </div>
+
+    <div class="ivp-stage">
+      <canvas id="ivpCanvas" role="img" aria-label="A living spherical field of note-colored particles that expands and glows with voice volume"></canvas>
+      <button class="ivp-mic" id="ivpMic" type="button" aria-label="Start listening">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3"></rect><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M9 21h6"></path></svg>
+      </button>
+    </div>
+
+    <div class="ivp-metrics">
+      <div class="ivp-metric"><div class="ivp-kicker">Frequency</div><div class="ivp-reading"><strong id="ivpFrequency">261.6</strong><span id="ivpFrequencyNote">C4</span></div></div>
+      <div class="ivp-metric"><div class="ivp-kicker">Voice volume</div><div class="ivp-reading"><strong id="ivpVolume">0</strong><span>%</span></div></div>
+    </div>
+
+    <div class="ivp-notes" id="ivpNotes" aria-label="Live chromatic note energy"></div>
+    <p class="ivp-error" id="ivpError">Microphone access is needed for live voice analysis.</p>
+  </section>
+
+  <script>
+    (function () {
+      var root = document.getElementById('intune-voice-plugin');
+      var canvas = root.querySelector('#ivpCanvas');
+      var context = canvas.getContext('2d');
+      var micButton = root.querySelector('#ivpMic');
+      var stateDot = root.querySelector('#ivpStateDot');
+      var stateText = root.querySelector('#ivpState');
+      var liveNoteEl = root.querySelector('#ivpLiveNote');
+      var hzEl = root.querySelector('#ivpHz');
+      var frequencyEl = root.querySelector('#ivpFrequency');
+      var frequencyNoteEl = root.querySelector('#ivpFrequencyNote');
+      var volumeEl = root.querySelector('#ivpVolume');
+      var noteContainer = root.querySelector('#ivpNotes');
+      var errorEl = root.querySelector('#ivpError');
+
+      var noteNames = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+      var noteColors = ['#36f20c','#18e5c5','#2198ff','#3128ff','#7926ee','#cc35d9','#ff3e83','#ff3b43','#ff581f','#ff8e18','#ffd51c','#a8f410'];
+      var noteEnergy = new Array(12).fill(.035);
+      var noteTargets = new Array(12).fill(.035);
+      var noteElements = [];
+      var audioContext = null;
+      var analyser = null;
+      var stream = null;
+      var timeData = null;
+      var frequencyData = null;
+      var isLive = false;
+      var displayVolume = .04;
+      var breath = .04;
+      var pitch = 261.63;
+      var dominantNote = 0;
+      var rotation = 0;
+      var frame = 0;
+      var width = 0;
+      var height = 0;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2);
+      var particles = [];
+
+      for (var n = 0; n < 12; n++) {
+        var noteItem = document.createElement('div');
+        noteItem.className = 'ivp-note';
+        noteItem.style.setProperty('--note-color', noteColors[n]);
+        noteItem.style.setProperty('--energy', '.035');
+        noteItem.innerHTML = '<span class="ivp-note-light"></span><span class="ivp-note-label">' + noteNames[n] + '</span>';
+        noteContainer.appendChild(noteItem);
+        noteElements.push(noteItem);
+      }
+
+      function fibonacciPoint(index, count) {
+        var y = 1 - (index / (count - 1)) * 2;
+        var radial = Math.sqrt(1 - y * y);
+        var theta = Math.PI * (3 - Math.sqrt(5)) * index;
+        return { x: Math.cos(theta) * radial, y: y, z: Math.sin(theta) * radial };
+      }
+
+      for (var i = 0; i < 1500; i++) {
+        var point = fibonacciPoint(i, 1500);
+        var azimuth = Math.atan2(point.z, point.x);
+        var chroma = Math.floor(((azimuth + Math.PI) / (Math.PI * 2)) * 12) % 12;
+        particles.push({
+          x: point.x,
+          y: point.y,
+          z: point.z,
+          note: chroma,
+          seed: (i * 0.61803398875) % 1,
+          size: .45 + ((i * 17) % 19) / 18,
+          histogram: i % 3 === 0,
+          layer: ((i * 7) % 13) / 12
+        });
+      }
+
+      function resize() {
+        var rect = canvas.getBoundingClientRect();
+        width = Math.max(284, rect.width);
+        height = width;
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        context.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function noteFromFrequency(frequency) {
+        var midi = Math.round(69 + 12 * Math.log2(Math.max(30, frequency) / 440));
+        return { index: ((midi % 12) + 12) % 12, octave: Math.floor(midi / 12) - 1, midi: midi };
+      }
+
+      function detectPitch(buffer, sampleRate) {
+        var rms = 0;
+        for (var i = 0; i < buffer.length; i++) rms += buffer[i] * buffer[i];
+        rms = Math.sqrt(rms / buffer.length);
+        if (rms < .012) return 0;
+        var minLag = Math.floor(sampleRate / 900);
+        var maxLag = Math.min(Math.floor(sampleRate / 70), buffer.length - 2);
+        var bestLag = -1;
+        var bestCorrelation = 0;
+        for (var lag = minLag; lag <= maxLag; lag += 2) {
+          var correlation = 0;
+          var normA = 0;
+          var normB = 0;
+          for (var j = 0; j < buffer.length - lag; j += 2) {
+            var a = buffer[j];
+            var b = buffer[j + lag];
+            correlation += a * b;
+            normA += a * a;
+            normB += b * b;
+          }
+          correlation /= Math.sqrt(normA * normB) || 1;
+          if (correlation > bestCorrelation) { bestCorrelation = correlation; bestLag = lag; }
+        }
+        return bestCorrelation > .48 && bestLag > 0 ? sampleRate / bestLag : 0;
+      }
+
+      function analyzeAudio() {
+        if (!analyser || !timeData || !frequencyData) return;
+        analyser.getFloatTimeDomainData(timeData);
+        analyser.getByteFrequencyData(frequencyData);
+
+        var sum = 0;
+        for (var i = 0; i < timeData.length; i++) sum += timeData[i] * timeData[i];
+        var rms = Math.sqrt(sum / timeData.length);
+        var targetVolume = Math.min(1, Math.max(0, (rms - .006) * 5.8));
+        displayVolume += (targetVolume - displayVolume) * (targetVolume > displayVolume ? .24 : .09);
+
+        noteTargets.fill(.012);
+        var binHz = audioContext.sampleRate / analyser.fftSize;
+        for (var bin = 2; bin < frequencyData.length; bin++) {
+          var hz = bin * binHz;
+          if (hz < 65 || hz > 1100) continue;
+          var midi = Math.round(69 + 12 * Math.log2(hz / 440));
+          var noteIndex = ((midi % 12) + 12) % 12;
+          noteTargets[noteIndex] += Math.pow(frequencyData[bin] / 255, 2.2) * .2;
+        }
+        var maxEnergy = Math.max.apply(null, noteTargets) || 1;
+        for (var n = 0; n < 12; n++) noteTargets[n] = Math.min(1, noteTargets[n] / Math.max(.12, maxEnergy));
+        dominantNote = noteTargets.indexOf(Math.max.apply(null, noteTargets));
+
+        if (frame % 5 === 0) {
+          var detected = detectPitch(timeData, audioContext.sampleRate);
+          if (detected > 0) pitch += (detected - pitch) * .3;
+        }
+      }
+
+      function updateReadings() {
+        for (var n = 0; n < 12; n++) {
+          noteEnergy[n] += (noteTargets[n] - noteEnergy[n]) * (noteTargets[n] > noteEnergy[n] ? .24 : .07);
+          noteElements[n].style.setProperty('--energy', noteEnergy[n].toFixed(3));
+        }
+        var pitchNote = noteFromFrequency(pitch);
+        var shownIndex = isLive ? pitchNote.index : dominantNote;
+        var shownOctave = isLive ? pitchNote.octave : 4;
+        var shownName = noteNames[shownIndex] + shownOctave;
+        liveNoteEl.textContent = shownName;
+        hzEl.textContent = pitch.toFixed(1) + ' Hz';
+        frequencyEl.textContent = pitch.toFixed(1);
+        frequencyNoteEl.textContent = shownName;
+        volumeEl.textContent = Math.round(displayVolume * 100);
+      }
+
+      function draw(time) {
+        frame++;
+        if (isLive) analyzeAudio();
+        else {
+          displayVolume += ((.10 + (Math.sin(time * .00145) + 1) * .09) - displayVolume) * .035;
+          pitch += ((261.63 + Math.sin(time * .00055) * 23) - pitch) * .025;
+          dominantNote = noteFromFrequency(pitch).index;
+          for (var demoNote = 0; demoNote < 12; demoNote++) {
+            var distance = Math.min(Math.abs(demoNote - dominantNote), 12 - Math.abs(demoNote - dominantNote));
+            noteTargets[demoNote] = .025 + Math.max(0, 1 - distance * .38) * (.24 + displayVolume * .75);
+          }
+        }
+
+        breath += (displayVolume - breath) * (displayVolume > breath ? .18 : .075);
+        updateReadings();
+        rotation += .00042 + breath * .00115;
+        context.clearRect(0, 0, width, height);
+
+        var centerX = width / 2;
+        var centerY = height / 2;
+        var baseRadius = width * .285;
+        var organismScale = .88 + breath * .34;
+        var radius = baseRadius * organismScale;
+        var activeColor = noteColors[dominantNote];
+
+        var aura = context.createRadialGradient(centerX, centerY, radius * .12, centerX, centerY, radius * 1.85);
+        aura.addColorStop(0, activeColor + Math.round((.10 + breath * .18) * 255).toString(16).padStart(2, '0'));
+        aura.addColorStop(.48, activeColor + Math.round((.045 + breath * .10) * 255).toString(16).padStart(2, '0'));
+        aura.addColorStop(1, 'rgba(0,0,0,0)');
+        context.fillStyle = aura;
+        context.fillRect(0, 0, width, height);
+
+        var cosY = Math.cos(rotation);
+        var sinY = Math.sin(rotation);
+        var cosX = Math.cos(.26 + Math.sin(time * .00019) * .08);
+        var sinX = Math.sin(.26 + Math.sin(time * .00019) * .08);
+        var projected = [];
+
+        for (var i = 0; i < particles.length; i++) {
+          var particle = particles[i];
+          var energy = noteEnergy[particle.note];
+          var livingWave = Math.sin(time * .0022 + particle.seed * 12 + particle.y * 3) * (.012 + breath * .025);
+          var histogramReach = particle.histogram ? energy * (.20 + particle.layer * .34) * (1 + breath * .55) : 0;
+          var localScale = 1 + livingWave + histogramReach;
+          var px = particle.x * localScale;
+          var py = particle.y * localScale;
+          var pz = particle.z * localScale;
+          var rotatedX = px * cosY - pz * sinY;
+          var rotatedZ = px * sinY + pz * cosY;
+          var rotatedY = py * cosX - rotatedZ * sinX;
+          var finalZ = py * sinX + rotatedZ * cosX;
+          projected.push({ particle: particle, x: rotatedX, y: rotatedY, z: finalZ, energy: energy });
+        }
+        projected.sort(function (a, b) { return a.z - b.z; });
+
+        for (var p = 0; p < projected.length; p++) {
+          var item = projected[p];
+          var depth = (item.z + 1.7) / 3.4;
+          var x = centerX + item.x * radius;
+          var y = centerY + item.y * radius;
+          var dotEnergy = Math.max(.025, item.energy);
+          var dotSize = item.particle.size * (.52 + depth * .9) * (1 + breath * .7 + dotEnergy * .7);
+          var opacity = Math.min(1, (.08 + depth * .52) * (.35 + breath * 1.35 + dotEnergy * 1.45));
+          var color = noteColors[item.particle.note];
+          context.beginPath();
+          context.fillStyle = color + Math.round(opacity * 255).toString(16).padStart(2, '0');
+          context.shadowBlur = 2 + breath * 16 + dotEnergy * 13;
+          context.shadowColor = color;
+          context.arc(x, y, dotSize, 0, Math.PI * 2);
+          context.fill();
+        }
+        context.shadowBlur = 0;
+        requestAnimationFrame(draw);
+      }
+
+      async function startListening() {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: false } });
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          analyser = audioContext.createAnalyser();
+          analyser.fftSize = 4096;
+          analyser.smoothingTimeConstant = .68;
+          timeData = new Float32Array(analyser.fftSize);
+          frequencyData = new Uint8Array(analyser.frequencyBinCount);
+          audioContext.createMediaStreamSource(stream).connect(analyser);
+          isLive = true;
+          errorEl.classList.remove('is-visible');
+          stateDot.classList.add('is-live');
+          micButton.classList.add('is-live');
+          stateText.textContent = 'Listening';
+          micButton.setAttribute('aria-label', 'Stop listening');
+        } catch (error) {
+          errorEl.classList.add('is-visible');
+          stateText.textContent = 'Microphone unavailable';
+        }
+      }
+
+      function stopListening() {
+        if (stream) stream.getTracks().forEach(function (track) { track.stop(); });
+        if (audioContext) audioContext.close();
+        stream = null;
+        audioContext = null;
+        analyser = null;
+        timeData = null;
+        frequencyData = null;
+        isLive = false;
+        stateDot.classList.remove('is-live');
+        micButton.classList.remove('is-live');
+        stateText.textContent = 'Tap to listen';
+        micButton.setAttribute('aria-label', 'Start listening');
+      }
+
+      micButton.addEventListener('click', function () { if (isLive) stopListening(); else startListening(); });
+      window.addEventListener('resize', resize);
+      resize();
+      requestAnimationFrame(draw);
+    }());
+  </script>
+</div>
